@@ -24,6 +24,9 @@ npm run build   # build de production dans dist/
 npm run preview # sert le build localement (test du service worker)
 ```
 
+Sous Windows, `start-local.cmd` fait tout cela : double-clic pour le serveur de développement,
+`start-local preview` pour tester la version PWA (build + service worker).
+
 ## Règle d'or
 
 > Une fonctionnalité n'est terminée que si : elle est typée, testée (si logique), documentée

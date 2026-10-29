@@ -26,10 +26,14 @@ Avant chaque push : `npm run format && npm run lint && npm run typecheck && npm 
 
 ## Stratégie de test
 
+Aucun test n'existe pour l'instant. Vitest est configuré avec `passWithNoTests: true` afin que la
+CI reste verte tant que l'application n'est pas développée. Les premiers tests arriveront avec le
+code.
+
 | Niveau           | Emplacement         | À tester                                            |
 | ---------------- | ------------------- | --------------------------------------------------- |
-| Logique pure     | `src/lib/*.test.ts` | filtres, recherche, formatage, cas limites          |
-| Composants/écran | `src/*.test.tsx`    | rendu, interactions utilisateur, persistance        |
+| Logique pure     | `src/lib/*.test.ts` | fonctions de calcul, formatage, cas limites         |
+| Composants/écran | `src/**/*.test.tsx` | rendu, interactions utilisateur, persistance        |
 | PWA / offline    | manuel              | installation, rechargement hors ligne (voir pwa.md) |
 
 Principes :
@@ -40,17 +44,17 @@ Principes :
 4. Ne pas viser 100 % : viser la couverture des règles métier et des cas limites.
 5. Un test doit être déterministe : pas de `sleep`, pas de dépendance à la date du jour.
 
-Exemple minimal :
+Exemple minimal (fonction pure) :
 
 ```ts
-it('filtre sur les favoris', () => {
-  const result = filterGames(games, {
-    query: '',
-    category: 'Toutes',
-    favoritesOnly: true,
-    favorites: new Set(['dixit']),
+import { describe, expect, it } from 'vitest';
+import { formatCount } from '@/lib/format';
+
+describe('formatCount', () => {
+  it('accorde le pluriel', () => {
+    expect(formatCount(1)).toBe('1 élément');
+    expect(formatCount(2)).toBe('2 éléments');
   });
-  expect(result.map((g) => g.id)).toEqual(['dixit']);
 });
 ```
 
@@ -62,6 +66,8 @@ Le service worker n'est actif qu'en build :
 npm run build
 npm run preview   # http://localhost:4173/ludotheque/
 ```
+
+Sous Windows, `start-local preview` enchaîne le build et le serveur de prévisualisation.
 
 Puis : DevTools → Application → Service Workers (vérifier « activated »), cocher « Offline » et
 recharger. L'application doit rester fonctionnelle.

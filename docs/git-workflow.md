@@ -33,7 +33,7 @@ Format : `<type>(<scope>): <description à l'impératif, en français>`
 Exemples :
 
 ```
-feat(filters): ajouter le filtre « favoris uniquement »
+feat(ui): ajouter l'écran de liste des jeux
 fix(pwa): corriger le start_url du manifest
 docs(conventions): préciser la règle d'import des types
 chore(deps): mettre à jour vite et vitest

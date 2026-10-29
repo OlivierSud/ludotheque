@@ -5,7 +5,7 @@
 - **Code** (variables, fonctions, types, fichiers) : anglais.
 - **Interface utilisateur, commentaires, documentation, messages de commit** : français.
 - Les identifiants du domaine peuvent rester en français s'ils sont des données métier
-  (ex. `Game`, `category: 'Coopératif'`).
+  (ex. `category: 'Coopératif'`).
 
 ## TypeScript
 
@@ -21,8 +21,8 @@
 - Les données immuables sont marquées `readonly` (`readonly Game[]`, propriétés `readonly`).
 - Utiliser des **unions littérales** plutôt que des `enum` :
   ```ts
-  export const GAME_CATEGORIES = ['Ambiance', 'Famille'] as const;
-  export type GameCategory = (typeof GAME_CATEGORIES)[number];
+  export const STATUSES = ['draft', 'published'] as const;
+  export type Status = (typeof STATUSES)[number];
   ```
 - Éviter les exports par défaut sauf pour les composants d'écran (`App.tsx`) et les configs.
 - Ne pas laisser de code mort, de `console.log` ou de `TODO` sans ticket associé.
@@ -33,7 +33,7 @@
 - Props déclarées via une `interface` nommée `<Composant>Props`, toutes en `readonly`.
 - Pas de `React.FC` : typer directement les props.
 - Les composants restent **présentationnels** : la logique métier vit dans `lib/`.
-- Les listes utilisent une `key` stable issue des données (`game.id`), jamais l'index.
+- Les listes utilisent une `key` stable issue des données (`item.id`), jamais l'index.
 - Hooks : préfixe `use`, un hook par fichier dans `src/hooks/`.
 - `useMemo` / `useCallback` seulement si le calcul est coûteux ou si la stabilité de référence
   est nécessaire (dépendances de hook, `memo`). Ne pas en mettre « au cas où ».
@@ -48,28 +48,28 @@
 
 | Élément             | Convention             | Exemple                       |
 | ------------------- | ---------------------- | ----------------------------- |
-| Composant / type    | `PascalCase`           | `GameCard`, `GameFilter`      |
-| Fonction / variable | `camelCase`            | `filterGames`, `visibleGames` |
-| Constante globale   | `SCREAMING_SNAKE_CASE` | `FAVORITES_KEY`               |
+| Composant / type    | `PascalCase`           | `ItemCard`, `ItemFilter`      |
+| Fonction / variable | `camelCase`            | `filterItems`, `visibleItems` |
+| Constante globale   | `SCREAMING_SNAKE_CASE` | `STORAGE_KEY`                 |
 | Hook                | `use` + `PascalCase`   | `useLocalStorage`             |
-| Fichier composant   | `PascalCase.tsx`       | `GameCard.tsx`                |
-| Fichier utilitaire  | `camelCase.ts`         | `games.ts`                    |
-| Test                | `<fichier>.test.ts(x)` | `games.test.ts`               |
+| Fichier composant   | `PascalCase.tsx`       | `ItemCard.tsx`                |
+| Fichier utilitaire  | `camelCase.ts`         | `format.ts`                   |
+| Test                | `<fichier>.test.ts(x)` | `format.test.ts`              |
 
 ## Imports
 
-- Alias `@/` obligatoire pour traverser les dossiers : `@/lib/games`, `@/components/GameCard`.
+- Alias `@/` obligatoire pour traverser les dossiers : `@/lib/format`, `@/components/ItemCard`.
 - Ordre : dépendances externes → alias `@/` → imports relatifs → styles.
 - Pas d'import circulaire. En cas de doute, déplacer le type partagé dans `types.ts`.
 
 ## CSS
 
-- Un seul fichier global (`src/index.css`) tant que l'application reste petite.
+- Un fichier global pour les styles de base et les variables (ex. `src/styles/global.css`).
 - Toutes les couleurs, rayons et polices passent par des variables CSS définies dans `:root`.
   Aucune couleur codée en dur dans un composant.
 - Nommage des classes en **BEM simplifié** : `.card`, `.card__title`, `.card--compact`.
 - Mobile-first : les media queries vont dans le sens `min-width`.
-- Respecter `prefers-reduced-motion` (déjà géré globalement).
+- Prévoir un bloc `@media (prefers-reduced-motion: reduce)` dans les styles globaux.
 - Toute nouvelle classe doit être utilisée ; ne pas laisser de CSS mort.
 
 ## Gestion des erreurs

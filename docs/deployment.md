@@ -50,7 +50,7 @@ toucher au code :
 
 ## Routage côté client
 
-L'application est aujourd'hui mono-écran. `public/404.html` redirige simplement toute URL
+Aucun routage n'est en place pour l'instant. `public/404.html` redirige simplement toute URL
 inconnue vers la racine du site.
 
 Si un routeur `BrowserRouter` est ajouté, remplacer ce fichier par la technique
@@ -94,4 +94,4 @@ serveur.
 - [ ] `/<base>/sw.js` répond en 200
 - [ ] Lighthouse → catégorie _PWA_ sans erreur bloquante
 - [ ] Installation possible (Chrome/Edge : icône dans la barre d'adresse)
-- [ ] Mode avion : rechargement OK, favoris persistants
+- [ ] Mode avion : rechargement OK, données persistées conservées

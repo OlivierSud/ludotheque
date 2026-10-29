@@ -3,63 +3,69 @@
 ## Vue d'ensemble
 
 Application **100 % statique** : aucun serveur, aucune base de données. Le build Vite produit des
-fichiers HTML/CSS/JS servis par GitHub Pages. La persistance utilisateur repose sur
-`localStorage`.
+fichiers HTML/CSS/JS servis par GitHub Pages. La configuration PWA (manifest + service worker) est
+déjà en place ; l'interface reste à développer.
 
 ```
 Navigateur
-  └── index.html (généré par Vite)
-        ├── src/main.tsx        → point d'entrée React
-        ├── src/App.tsx         → écran principal (recherche, filtres, favoris)
-        └── sw.js               → service worker (Workbox, généré par vite-plugin-pwa)
+  └── index.html (coquille générée par Vite)
+        ├── <div id="root">        → point de montage React (à brancher)
+        └── sw.js                  → service worker (Workbox, généré au build)
 ```
 
-## Structure des dossiers
+## État actuel du dépôt
+
+| Présent                                          | Absent (à venir avec les maquettes)               |
+| ------------------------------------------------ | ------------------------------------------------- |
+| Build Vite, alias `@/`, base GitHub Pages        | Code applicatif (`src/`)                          |
+| TypeScript strict, ESLint, Prettier              | Écrans et composants                              |
+| Manifest PWA, service worker, icônes provisoires | Routage                                           |
+| CI (lint/types/tests/build) et déploiement Pages | Tests (aucun test pour l'instant)                 |
+| `start-local.cmd`                                | Source de données (statique, API, stockage local) |
+
+`src/` ne contient que `vite-env.d.ts` (types d'environnement Vite et PWA). `index.html` ne
+charge **aucun** script : c'est volontaire tant que l'application n'existe pas.
+
+## Brancher l'application
+
+1. Créer `src/main.tsx` (point d'entrée React).
+2. Ajouter dans `index.html`, avant `</body>` :
+   ```html
+   <script type="module" src="/src/main.tsx"></script>
+   ```
+3. Lancer `start-local` : le serveur sert l'application sur `http://localhost:5173/ludotheque/`.
+
+## Structure cible (à valider avec les maquettes)
+
+Proposition de départ, à ajuster selon les écrans réels :
 
 ```
-.
-├── .github/
-│   ├── workflows/ci.yml           # lint + types + tests + build sur PR/push
-│   ├── workflows/deploy.yml       # build + publication GitHub Pages sur main
-│   ├── dependabot.yml             # mises à jour automatisées
-│   └── PULL_REQUEST_TEMPLATE.md
-├── docs/                          # règles du projet (ce dossier)
-├── public/                        # fichiers copiés tels quels dans dist/
-│   ├── icons/                     # icônes PWA (192, 512, maskable)
-│   ├── 404.html                   # redirection SPA sur GitHub Pages
-│   ├── favicon.svg
-│   └── apple-touch-icon.png
-├── scripts/
-│   └── generate-icons.ps1         # régénération des icônes PNG
-├── src/
-│   ├── components/                # composants présentationnels réutilisables
-│   ├── data/                      # données statiques (collection de jeux)
-│   ├── hooks/                     # hooks React réutilisables
-│   ├── lib/                       # logique pure, testable, sans React
-│   ├── test/                      # setup Vitest et doublures
-│   ├── App.tsx                    # composition de l'écran principal
-│   ├── main.tsx                   # bootstrap React
-│   ├── index.css                  # styles globaux (design tokens inclus)
-│   └── types.ts                   # types partagés du domaine
-├── index.html
-├── vite.config.ts                 # base path, alias, plugin PWA
-└── vitest.config.ts
+src/
+├── components/     # composants présentationnels réutilisables
+├── features/       # (optionnel) un dossier par domaine fonctionnel
+├── hooks/          # hooks React réutilisables
+├── lib/            # logique pure, sans React, testable
+├── services/       # accès aux données (statique, API, localStorage)
+├── styles/         # (optionnel) styles globaux et thèmes
+├── App.tsx         # composition de l'écran principal
+├── main.tsx        # bootstrap React
+└── types.ts        # types partagés du domaine
 ```
 
-## Règle de dépendance entre couches
+Règle de dépendance :
 
 ```
 components  →  lib  →  types
      ↓         ↑
    hooks ──────┘
      ↓
-  data (données statiques)
+ services (effets de bord : stockage, réseau)
 ```
 
-- `lib/` ne contient **aucun** import React : ce sont des fonctions pures, testables isolément.
-- `components/` ne fait pas d'accès direct au `localStorage` : il reçoit des props.
+- `lib/` ne contient **aucun** import React : fonctions pures, testables isolément.
+- `components/` ne fait pas d'accès direct au stockage ou au réseau : il reçoit des props.
 - `hooks/` encapsule les effets de bord (stockage, abonnements, timers).
-- `App.tsx` orchestre l'état et passe les données aux composants.
+- `services/` centralise les appels réseau et la persistance.
 - `types.ts` ne dépend de rien.
 
 ## Décisions techniques
@@ -68,31 +74,21 @@ components  →  lib  →  types
 | ----------- | --------------------------- | ---------------------------------------------------------------- |
 | Build       | Vite                        | Démarrage rapide, sortie statique, écosystème PWA mature         |
 | UI          | React + TypeScript strict   | Typage du domaine, composants simples à tester                   |
-| Styles      | CSS natif + variables       | Aucune dépendance runtime, thème centralisé dans `:root`         |
+| Styles      | CSS natif                   | Aucune dépendance runtime, thème centralisé dans `:root`         |
 | PWA         | `vite-plugin-pwa` (Workbox) | Manifest + service worker générés au build, précache automatique |
-| Persistance | `localStorage`              | Aucun backend ; suffisant pour favoris et préférences            |
 | Tests       | Vitest + Testing Library    | Même outillage que Vite, exécution rapide                        |
 | Hébergement | GitHub Pages                | Gratuit, HTTPS, adapté à un site statique                        |
-| Routage     | Aucun (mono-écran)          | Pas de dépendance routeur tant que le besoin n'existe pas        |
 
-### Ajouter un routeur plus tard
+## Points à trancher avec la maquette
 
-Si plusieurs écrans deviennent nécessaires :
+À documenter ici dès que les choix sont faits :
 
-1. Utiliser `react-router` en mode `HashRouter` (le plus simple sur GitHub Pages) **ou**
-   `BrowserRouter` avec `basename={import.meta.env.BASE_URL}`.
-2. Pour `BrowserRouter`, mettre en place la technique « spa-github-pages » (voir
+1. **Routage** : aucune route pour l'instant, puis `HashRouter` ou `BrowserRouter` (voir
    [deployment.md](./deployment.md#routage-côté-client)).
-3. Adapter `navigateFallback` dans `vite.config.ts` pour exclure les fichiers statiques.
+2. **Styles** : CSS natif (choix actuel), CSS Modules ou Tailwind.
+3. **Données** : collection statique, fichier JSON, `localStorage` ou API distante.
+4. **État global** : `useState` local, Context ou bibliothèque dédiée (uniquement si nécessaire).
+5. **Thème** : clair/sombre, couleurs et typographie issus de la charte.
 
-## Données
-
-`src/data/games.ts` expose une collection typée `readonly Game[]`. Pour brancher une vraie
-source :
-
-1. Créer un module `src/services/` (ex. `gamesRepository.ts`) qui retourne `Promise<Game[]>`.
-2. Charger les données dans un hook (`useGames`) avec états `loading` / `error` / `data`.
-3. Prévoir un cache (`localStorage` ou Cache API) pour conserver le mode hors ligne.
-
-Toute évolution du modèle se fait d'abord dans `src/types.ts`, puis se propage aux données et
-aux tests.
+Toute décision structurante se documente dans ce fichier et dans le README, dans le même commit
+que le code concerné.

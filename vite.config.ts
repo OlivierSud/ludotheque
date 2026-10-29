@@ -10,7 +10,7 @@ import { VitePWA } from 'vite-plugin-pwa';
  * GitHub Pages sert le site depuis https://<user>.github.io/<repo>/.
  * En CI, `VITE_BASE_PATH` est injecté par le workflow (voir docs/deployment.md).
  */
-const REPO_NAME = 'ludoteque';
+const REPO_NAME = 'ludotheque';
 const base = process.env.VITE_BASE_PATH ?? `/${REPO_NAME}/`;
 
 export default defineConfig({
@@ -24,11 +24,14 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'prompt',
+      // L'enregistrement sera fait dans l'application via `virtual:pwa-register`
+      // (voir docs/pwa.md) pour maîtriser la bannière de mise à jour.
+      injectRegister: false,
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
         name: 'Ludothèque',
         short_name: 'Ludothèque',
-        description: 'Parcourez et gérez votre collection de jeux de société.',
+        description: 'Application web de gestion de ludothèque.',
         lang: 'fr',
         dir: 'ltr',
         display: 'standalone',
