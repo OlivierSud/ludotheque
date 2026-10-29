@@ -34,3 +34,6 @@ Thumbs.db
 # Divers
 *.tsbuildinfo
 .eslintcache
+
+# Graphe Graphify (généré)
+graphify-out/

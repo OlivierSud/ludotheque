@@ -2,89 +2,119 @@
 
 ## Commandes locales
 
-| Commande                | Effet                                               |
-| ----------------------- | --------------------------------------------------- |
-| `npm run lint`          | ESLint sur tout le dépôt                            |
-| `npm run typecheck`     | Vérification TypeScript (build mode, sans émission) |
-| `npm run test`          | Tests unitaires (Vitest, une passe)                 |
-| `npm run test:watch`    | Tests en mode watch                                 |
-| `npm run test:coverage` | Rapport de couverture (`coverage/`)                 |
-| `npm run format`        | Prettier en écriture                                |
-| `npm run format:check`  | Vérifie le formatage sans modifier                  |
-| `npm run build`         | Typecheck + build de production                     |
+| Commande                | Effet                               |
+| ----------------------- | ----------------------------------- |
+| `npm run lint`          | ESLint sur tout le dépôt            |
+| `npm run typecheck`     | Vérification TypeScript             |
+| `npm run test`          | Tests unitaires (Vitest)            |
+| `npm run test:watch`    | Tests en watch                      |
+| `npm run test:coverage` | Rapport de couverture (`coverage/`) |
+| `npm run format`        | Prettier en écriture                |
+| `npm run format:check`  | Vérifie le formatage                |
+| `npm run build`         | Typecheck + build de production     |
 
-Avant chaque push : `npm run format && npm run lint && npm run typecheck && npm run test`.
+Avant chaque push :
+`npm run format && npm run lint && npm run typecheck && npm run test && npm run build`.
 
 ## Outillage
 
-- **ESLint 10** (flat config, `eslint.config.js`) : `@eslint/js`, `typescript-eslint`,
-  `eslint-plugin-react-hooks`, `eslint-plugin-react-refresh`.
-- **Prettier** (`.prettierrc.json`) : 100 colonnes, guillemets simples, virgules finales.
-  `eslint-config-prettier` désactive les règles de style d'ESLint pour éviter les conflits.
-- **Vitest 5** + **Testing Library** + **jsdom** pour les tests d'interface.
-- **GitHub Actions** : `ci.yml` rejoue tout sur chaque PR et sur `main`.
+- **ESLint 10** (flat config) : `@eslint/js`, `typescript-eslint`, règles React Hooks.
+- **Prettier** : 100 colonnes, guillemets simples, virgules finales.
+- **Vitest 5** + **Testing Library** + **jsdom**.
+- **GitHub Actions** : `ci.yml` sur chaque PR et sur `main`.
 
 ## Stratégie de test
 
-Aucun test n'existe pour l'instant. Vitest est configuré avec `passWithNoTests: true` afin que la
-CI reste verte tant que l'application n'est pas développée. Les premiers tests arriveront avec le
-code.
+Aucun test n'existe encore. `passWithNoTests` est activé pour que la CI reste verte jusqu'au
+premier écran.
 
-| Niveau           | Emplacement         | À tester                                            |
-| ---------------- | ------------------- | --------------------------------------------------- |
-| Logique pure     | `src/lib/*.test.ts` | fonctions de calcul, formatage, cas limites         |
-| Composants/écran | `src/**/*.test.tsx` | rendu, interactions utilisateur, persistance        |
-| PWA / offline    | manuel              | installation, rechargement hors ligne (voir pwa.md) |
+| Niveau                | Emplacement                                 | À couvrir                                                 |
+| --------------------- | ------------------------------------------- | --------------------------------------------------------- |
+| Logique pure          | `src/lib/*.test.ts`                         | validation, filtres, formatage, cas limites               |
+| Services              | `src/services/*.test.ts`                    | contrat API (succès, erreurs, timeout) avec `fetch` mocké |
+| Composants/écran      | `src/**/*.test.tsx`                         | rendu, interactions, états vide/chargement/erreur         |
+| Backend (Apps Script) | `backend/apps-script/*.test.js` (optionnel) | validation, vérification Turnstile (mock)                 |
+| PWA / hors-ligne      | manuel                                      | installation, cache, mise à jour                          |
 
 Principes :
 
 1. Tester le **comportement observable**, pas l'implémentation (pas de snapshot de markup).
-2. Requêtes Testing Library par rôle/label : `getByRole`, `getByLabelText` — jamais par classe CSS.
+2. Requêtes par rôle/label (`getByRole`, `getByLabelText`), jamais par classe CSS.
 3. Chaque bug corrigé arrive avec un test qui échouait avant.
-4. Ne pas viser 100 % : viser la couverture des règles métier et des cas limites.
-5. Un test doit être déterministe : pas de `sleep`, pas de dépendance à la date du jour.
+4. Un test est déterministe : pas de `sleep`, pas de dépendance à la date ou au réseau réel.
+5. La validation serveur se teste avec des payloads **invalides** (champs manquants, bornes,
+   types, XSS, URL `javascript:`).
 
-Exemple minimal (fonction pure) :
+## Plan de recette manuel
 
-```ts
-import { describe, expect, it } from 'vitest';
-import { formatCount } from '@/lib/format';
+À exécuter avant chaque mise en production :
 
-describe('formatCount', () => {
-  it('accorde le pluriel', () => {
-    expect(formatCount(1)).toBe('1 élément');
-    expect(formatCount(2)).toBe('2 éléments');
-  });
-});
-```
+### Fonctionnel
 
-## Tests de la PWA en local
+- [ ] Liste chargée (état de chargement visible)
+- [ ] Recherche : accents, casse, aucun résultat
+- [ ] Filtres : chaque catégorie, combinaisons, réinitialisation
+- [ ] Fiche d'un jeu : toutes les données, retour à la liste
+- [ ] Ajout valide → apparaît dans la liste
+- [ ] Ajout invalide → erreurs de champ, rien en base
+- [ ] Turnstile absent/expiré → refus explicite
+- [ ] Double clic sur « Ajouter » → une seule ligne créée
+- [ ] Réseau coupé → message clair, cache affiché
 
-Le service worker n'est actif qu'en build :
+### Responsive (à tester réellement)
 
-```bash
-npm run build
-npm run preview   # http://localhost:4173/ludotheque/
-```
+| Largeur | Cible                       |
+| ------- | --------------------------- |
+| 360 px  | Petit mobile Android        |
+| 390 px  | iPhone 12/13/14             |
+| 768 px  | Tablette portrait           |
+| 1024 px | Tablette paysage / petit PC |
+| 1440 px | Desktop                     |
 
-Sous Windows, `start-local preview` enchaîne le build et le serveur de prévisualisation.
+- [ ] Aucun scroll horizontal
+- [ ] Zones tactiles ≥ 44 px
+- [ ] Lisibilité et contrastes
+- [ ] Navigation clavier complète (Tab, Entrée, Échap)
 
-Puis : DevTools → Application → Service Workers (vérifier « activated »), cocher « Offline » et
-recharger. L'application doit rester fonctionnelle.
+### PWA
+
+- [ ] Installation depuis Réglages (Android/Chrome)
+- [ ] Instructions iOS affichées correctement
+- [ ] Entrée masquée si déjà installée
+- [ ] Hors ligne : liste et filtres fonctionnels
+- [ ] Mise à jour : comportement conforme à la décision validée
+
+### Légal
+
+- [ ] Mentions légales accessibles (pied de page + Réglages)
+- [ ] Politique de confidentialité à jour
+- [ ] Aucun cookie non déclaré
 
 ## Intégration continue
 
-`ci.yml` (PR + `main`) exécute dans l'ordre : `format:check` → `lint` → `typecheck` → `test` →
-`build`, puis publie `dist` comme artefact 7 jours.
+`ci.yml` (PR + `main`) : `format:check` → `lint` → `typecheck` → `test` → `build`, puis publication
+de `dist` en artefact 7 jours.
 
-`deploy.yml` (push sur `main` ou déclenchement manuel) refait lint/types/tests, construit avec le
-bon `base` et publie sur GitHub Pages. Voir [deployment.md](./deployment.md).
+`deploy.yml` (push sur `main` ou manuel) : mêmes vérifications, build avec le bon `base`, puis
+publication GitHub Pages.
+
+Une PR ne se merge pas si la CI est rouge.
+
+## Couverture
+
+Pas d'objectif chiffré global. Objectif ciblé :
+
+- 100 % des règles de validation (client et serveur) ;
+- 100 % des fonctions de `src/lib/` ;
+- les parcours critiques (ajout, recherche, états d'erreur).
 
 ## Définition de « terminé »
 
-- [ ] Comportement conforme, y compris cas vides et erreurs
+- [ ] Conforme à la maquette (mobile + desktop) et à `docs/product.md`
 - [ ] Types stricts, aucun `any`
 - [ ] Tests ajoutés/mis à jour
 - [ ] `lint`, `typecheck`, `test`, `build` verts
-- [ ] Accessibilité vérifiée au clavier
-- [ ] Documentation mise à jour si une règle change
+- [ ] Accessibilité vérifiée au clavier et en contraste
+- [ ] README et `docs/` à jour
+- [ ] Décision consignée dans `decisions.md`
+- [ ] Aucun secret, aucune donnée personnelle dans le dépôt

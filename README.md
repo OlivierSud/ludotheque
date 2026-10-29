@@ -1,51 +1,66 @@
 # Ludothèque 🎲
 
-Socle technique du projet **Ludothèque** : application web progressive (PWA) destinée à être
-déployée sur GitHub Pages.
+Application web progressive (PWA) pour consulter et enrichir une ludothèque de jeux de société,
+**sans compte utilisateur**. Déployée sur GitHub Pages, elle lit et écrit ses données dans une
+Google Sheet via un Web App Google Apps Script, et protège les écritures avec Cloudflare Turnstile.
 
 [![CI](https://github.com/OlivierSud/ludotheque/actions/workflows/ci.yml/badge.svg)](https://github.com/OlivierSud/ludotheque/actions/workflows/ci.yml)
 [![Déploiement](https://github.com/OlivierSud/ludotheque/actions/workflows/deploy.yml/badge.svg)](https://github.com/OlivierSud/ludotheque/actions/workflows/deploy.yml)
 
-> **État du projet : socle uniquement.**
-> Ce dépôt contient la configuration (build, qualité, CI/CD, PWA) et l'outil de serveur local.
-> Aucune interface n'est développée : elle sera construite à partir des wireframes et de la
-> maquette à venir. `index.html` n'est qu'une coquille avec `<div id="root"></div>`.
+> **État du projet : cadrage.**
+> Le socle technique est prêt (build, qualité, CI/CD, PWA, serveur local). L'interface sera
+> développée à partir des wireframes et de la maquette à venir. Voir la
+> [roadmap](docs/roadmap.md).
 
-## Contenu du dépôt
+## Principes
 
-| Élément                        | Rôle                                                      |
-| ------------------------------ | --------------------------------------------------------- |
-| `vite.config.ts`               | Build, `base` GitHub Pages, alias `@/`, configuration PWA |
-| `vitest.config.ts`             | Configuration des tests (aucun test pour l'instant)       |
-| `tsconfig*.json`               | TypeScript strict (app + fichiers de config)              |
-| `eslint.config.js`             | Règles de lint (flat config)                              |
-| `.prettierrc.json`             | Formatage du code                                         |
-| `.github/workflows/ci.yml`     | Lint, types, tests et build sur PR et `main`              |
-| `.github/workflows/deploy.yml` | Publication automatique sur GitHub Pages                  |
-| `public/`                      | `404.html` (redirection SPA) + icônes PWA provisoires     |
-| `start-local.cmd`              | Lancement du serveur local sous Windows                   |
-| `docs/`                        | Règles du projet (architecture, conventions, PWA, etc.)   |
+| Principe                | Règle                                                                       |
+| ----------------------- | --------------------------------------------------------------------------- |
+| **100 % gratuit**       | GitHub Pages, Google Sheets, Apps Script, Cloudflare Turnstile, open source |
+| **Sans compte**         | Lecture et ajout publics, aucune authentification                           |
+| **PC + mobile**         | Chaque écran est conçu et testé sur les deux formats                        |
+| **PWA dans Réglages**   | Installation proposée dans le menu, jamais en bannière automatique          |
+| **Maquette = vérité**   | Aucune invention visuelle ; tout écart doit être validé                     |
+| **Demander avant**      | Aucune décision structurante sans accord (voir [AGENTS.md](AGENTS.md))      |
+| **Données dans Sheets** | Jamais de clé Google côté navigateur                                        |
+| **Turnstile**           | Toute écriture est vérifiée côté serveur                                    |
+| **Légal**               | Mentions légales et confidentialité accessibles depuis l'application        |
 
 ## Stack
 
-| Domaine     | Choix                                                          |
-| ----------- | -------------------------------------------------------------- |
-| Build       | [Vite](https://vite.dev/) 8                                    |
-| UI          | [React](https://react.dev/) 19 + TypeScript strict             |
-| Styles      | CSS natif (aucune dépendance runtime)                          |
-| PWA         | [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) (Workbox) |
-| Tests       | [Vitest](https://vitest.dev/) + Testing Library                |
-| Qualité     | ESLint 10 + Prettier                                           |
-| Hébergement | GitHub Pages (via GitHub Actions)                              |
+| Domaine     | Choix                                                                  | Coût |
+| ----------- | ---------------------------------------------------------------------- | ---- |
+| Build       | [Vite](https://vite.dev/) 8                                            | 0 €  |
+| UI          | [React](https://react.dev/) 19 + TypeScript strict                     | 0 €  |
+| Styles      | CSS natif + design tokens issus de la maquette                         | 0 €  |
+| PWA         | [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) (Workbox)         | 0 €  |
+| Backend     | Google Apps Script (Web App)                                           | 0 €  |
+| Données     | Google Sheets                                                          | 0 €  |
+| Anti-bot    | [Cloudflare Turnstile](https://www.cloudflare.com/products/turnstile/) | 0 €  |
+| Tests       | [Vitest](https://vitest.dev/) + Testing Library                        | 0 €  |
+| Qualité     | ESLint 10 + Prettier                                                   | 0 €  |
+| Hébergement | GitHub Pages (via GitHub Actions)                                      | 0 €  |
 
 ## Démarrage
 
 Prérequis : **Node.js 22+** (voir `.nvmrc`) et npm.
 
 ```bash
-npm ci            # dépendances exactes du lockfile
-npm run dev       # http://localhost:5173/ludotheque/
+npm ci                 # dépendances exactes du lockfile
+cp .env.example .env.local   # puis renseigner les variables (voir ci-dessous)
+npm run dev            # http://localhost:5173/ludotheque/
 ```
+
+### Variables d'environnement
+
+| Variable                  | Rôle                               | Visible client |
+| ------------------------- | ---------------------------------- | -------------- |
+| `VITE_API_URL`            | URL `/exec` du Web App Apps Script | Oui (normal)   |
+| `VITE_TURNSTILE_SITE_KEY` | Clé publique Turnstile             | Oui (normal)   |
+| `VITE_BASE_PATH`          | Chemin de déploiement (optionnel)  | Oui            |
+
+Les valeurs `VITE_*` sont intégrées au bundle : **ne jamais y placer un secret**. Le secret
+Turnstile vit uniquement dans les propriétés du script Apps Script.
 
 ### Tester en local sous Windows
 
@@ -79,25 +94,37 @@ vérifie Node.js, installe les dépendances si besoin, démarre le serveur et ou
 
 ```
 .
-├── .github/          # workflows CI/CD, Dependabot, template de PR
-├── docs/             # règles du projet
-├── public/           # 404.html, favicon, icônes PWA (provisoires)
-├── src/              # vide : accueillera le code de l'application
-├── index.html        # coquille HTML (#root)
-├── start-local.cmd   # lanceur Windows
+├── .github/              # workflows CI/CD, Dependabot, template de PR
+├── .opencode/skills/     # skills agents IA (ponytail, ludotheque)
+├── backend/apps-script/  # code du Web App Apps Script (à créer)
+├── docs/                 # règles du projet, lisibles par un humain et un agent IA
+├── public/               # 404.html, favicon, icônes PWA (provisoires)
+├── src/                  # accueillera le code de l'application
+├── index.html            # coquille HTML (#root)
+├── start-local.cmd       # lanceur Windows
+├── AGENTS.md             # point d'entrée des agents IA
 └── vite.config.ts
 ```
 
 ## Documentation
 
-Les règles du projet sont dans [`docs/`](docs/README.md) :
+Les règles du projet sont dans [`docs/`](docs/README.md). Point d'entrée pour les agents IA :
+[`AGENTS.md`](AGENTS.md).
 
-- [Architecture](docs/architecture.md) — socle actuel et structure cible
-- [Conventions de code](docs/conventions.md) — TypeScript, React, CSS, nommage
-- [Workflow Git](docs/git-workflow.md) — branches, Conventional Commits, PR
-- [Qualité](docs/quality.md) — lint, tests, CI, définition de « terminé »
-- [PWA](docs/pwa.md) — manifest, service worker, icônes
-- [Déploiement](docs/deployment.md) — GitHub Pages, `base` path, dépannage
+- [Produit](docs/product.md) — vision, périmètre, exigences
+- [Architecture](docs/architecture.md) — stack, flux, Apps Script, structure cible
+- [Conventions](docs/conventions.md) — TypeScript, React, CSS, nommage
+- [Design](docs/design.md) — maquette, responsive, style, validation visuelle
+- [Données Google Sheets](docs/data-google-sheet.md) — schéma, API, validation
+- [Sécurité](docs/security.md) — Turnstile, anti-abus, secrets, CORS
+- [Mentions légales](docs/legal.md) — LCEN, RGPD, cookies
+- [PWA](docs/pwa.md) — installation depuis les Réglages, hors-ligne
+- [Qualité](docs/quality.md) — tests, CI, plan de recette
+- [Workflow Git](docs/git-workflow.md) — branches, commits, PR
+- [Déploiement](docs/deployment.md) — GitHub Pages, Apps Script, variables
+- [Workflow IA](docs/ai-workflow.md) — Graphify, Ponytail, skills
+- [Décisions](docs/decisions.md) — journal et questions ouvertes
+- [Roadmap](docs/roadmap.md) — phases et critères de sortie
 
 ## Déploiement
 
@@ -112,16 +139,19 @@ définir la variable de dépôt `VITE_BASE_PATH=/`. Détails et dépannage :
 
 ## Prochaines étapes
 
-1. Recevoir les wireframes et la maquette.
-2. Créer `src/main.tsx` et le premier écran, en suivant [docs/conventions.md](docs/conventions.md).
-3. Remplacer les icônes PWA provisoires (`public/icons/`, `public/favicon.svg`) par celles de la
-   charte graphique.
-4. Ajouter les tests au fur et à mesure dans `src/**/*.test.tsx`.
+1. Recevoir les wireframes, la maquette et les références de style
+   ([docs/design.md](docs/design.md)).
+2. Trancher les questions ouvertes de [docs/decisions.md](docs/decisions.md).
+3. Mettre en place la Google Sheet, le Web App Apps Script et Turnstile
+   ([docs/data-google-sheet.md](docs/data-google-sheet.md), [docs/security.md](docs/security.md)).
+4. Développer les écrans, mobile d'abord, puis les tests.
+5. Remplacer les icônes PWA provisoires par celles de la charte graphique.
 
 ## Contribuer
 
 1. Créer une branche : `feat/ma-fonctionnalite`, `fix/mon-bug`, `docs/…`
-2. Coder en respectant [docs/conventions.md](docs/conventions.md)
+2. Coder en respectant [docs/conventions.md](docs/conventions.md) et la maquette
 3. Vérifier localement :
    `npm run format && npm run lint && npm run typecheck && npm run test && npm run build`
-4. Ouvrir une pull request (le template est prérempli)
+4. Mettre à jour le README et `docs/` dans la même PR
+5. Ouvrir une pull request (le template est prérempli)

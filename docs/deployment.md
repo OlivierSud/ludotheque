@@ -1,97 +1,133 @@
-# Déploiement — GitHub Pages
+# Déploiement
 
-## Fonctionnement
+## Vue d'ensemble
 
-Le workflow `.github/workflows/deploy.yml` :
+| Composant | Où                           | Déclencheur                  |
+| --------- | ---------------------------- | ---------------------------- |
+| Frontend  | GitHub Pages                 | push sur `main` (workflow)   |
+| Backend   | Google Apps Script (Web App) | déploiement manuel (éditeur) |
+| Données   | Google Sheets                | via Apps Script uniquement   |
+| Anti-bot  | Cloudflare Turnstile         | configuration manuelle       |
 
-1. se déclenche sur `push` vers `main` (ou manuellement via _Run workflow_) ;
-2. installe les dépendances (`npm ci`), lance lint, types et tests ;
-3. construit l'application avec le bon chemin de base ;
-4. publie `dist/` sur GitHub Pages via OIDC (aucun token à stocker).
+## Frontend — GitHub Pages
 
-L'URL de production est `https://<utilisateur>.github.io/<dépôt>/`, ici :
-**https://oliviersud.github.io/ludotheque/**
+Workflow `.github/workflows/deploy.yml` : `npm ci` → lint → typecheck → test → build → publication
+via OIDC.
 
-## Configuration initiale (une seule fois)
+### Activation initiale (une fois)
 
-1. **Settings → Pages → Build and deployment → Source : GitHub Actions.**
-2. **Settings → Environments → `github-pages`** : vérifier que la branche `main` est autorisée.
-3. Pousser sur `main` : le premier déploiement crée l'environnement automatiquement.
-4. (Recommandé) **Settings → Branches → protection de `main`** : PR obligatoire + CI verte.
+1. **Settings → Pages → Source : GitHub Actions**.
+2. **Settings → Environments → `github-pages`** : autoriser `main`.
+3. Pousser sur `main`.
+4. (Recommandé) Protéger `main` : PR obligatoire + CI verte.
 
-## Le `base` path
+URL : `https://oliviersud.github.io/ludotheque/`.
 
-GitHub Pages sert un dépôt projet depuis un sous-dossier : tous les assets doivent être
-préfixés. C'est le rôle de `base` dans `vite.config.ts` :
+### Le `base` path
 
 ```ts
 const base = process.env.VITE_BASE_PATH ?? '/ludotheque/';
 ```
 
-| Contexte                                   | `VITE_BASE_PATH`                   |
-| ------------------------------------------ | ---------------------------------- |
-| Dépôt projet (`/<dépôt>/`)                 | `/ludotheque/`                     |
-| Domaine personnalisé ou `<user>.github.io` | `/`                                |
-| Développement local                        | `/ludotheque/` (valeur par défaut) |
+| Contexte                                  | `VITE_BASE_PATH` |
+| ----------------------------------------- | ---------------- |
+| Dépôt projet                              | `/ludotheque/`   |
+| Domaine personnalisé / `<user>.github.io` | `/`              |
 
-En CI, le chemin est calculé automatiquement à partir du nom du dépôt. Pour le surcharger sans
-toucher au code :
+En CI, la valeur est calculée depuis le nom du dépôt. Surcharge possible via
+**Settings → Secrets and variables → Actions → Variables** (`VITE_BASE_PATH`).
 
-> **Settings → Secrets and variables → Actions → Variables → New repository variable**
-> `VITE_BASE_PATH` = `/`
+Conséquences :
 
-### Conséquences à respecter
+- Jamais de chemin absolu codé en dur : utiliser `import.meta.env.BASE_URL`.
+- `start_url` et `scope` du manifest suivent `base`.
+- Liens internes : inclure le base ou configurer le routeur avec `basename`.
 
-- **Ne jamais** coder un chemin absolu en dur (`/images/...`) : utiliser `import.meta.env.BASE_URL`
-  ou une URL relative au manifest.
-- Les liens internes doivent inclure le base (ou passer par un routeur configuré avec `basename`).
-- Le `start_url` et le `scope` du manifest sont construits à partir de `base` : ne pas les
-  dissocier.
+## Variables et secrets
 
-## Routage côté client
+### Variables GitHub (publiques, injectées au build)
 
-Aucun routage n'est en place pour l'instant. `public/404.html` redirige simplement toute URL
-inconnue vers la racine du site.
+| Nom                       | Exemple                                     |
+| ------------------------- | ------------------------------------------- |
+| `VITE_API_URL`            | `https://script.google.com/macros/s/…/exec` |
+| `VITE_TURNSTILE_SITE_KEY` | `0x4AAA…`                                   |
+| `VITE_BASE_PATH`          | `/ludotheque/` (optionnel)                  |
 
-Si un routeur `BrowserRouter` est ajouté, remplacer ce fichier par la technique
-« spa-github-pages » :
+Les valeurs `VITE_*` finissent **dans le bundle** : ne jamais y mettre un secret.
 
-1. `public/404.html` encode le chemin demandé puis redirige vers `index.html`.
-2. `index.html` (script inline) restaure l'URL d'origine avant le chargement de React.
-3. Ajouter `basename={import.meta.env.BASE_URL}` au routeur.
+### Secrets
 
-Alternative plus simple : `HashRouter` (`/#/jeux/azul`), qui ne nécessite aucune configuration
-serveur.
+| Nom                | Où                               |
+| ------------------ | -------------------------------- |
+| `TURNSTILE_SECRET` | Propriétés du script Apps Script |
+| `SHEET_ID`         | Propriétés du script Apps Script |
 
-## Domaine personnalisé
+### Local
 
-1. Créer `public/CNAME` contenant le domaine (`ludotheque.example.com`).
-2. Configurer le DNS : `CNAME` vers `<utilisateur>.github.io`.
-3. Settings → Pages → renseigner le domaine, activer _Enforce HTTPS_.
-4. Définir la variable `VITE_BASE_PATH` à `/` et redéployer.
+Créer `.env.local` (ignoré par Git) :
 
-## Déploiement manuel / rollback
+```dotenv
+VITE_API_URL=https://script.google.com/macros/s/…/exec
+VITE_TURNSTILE_SITE_KEY=1x00000000000000000000AA
+```
 
-- **Redéployer** : Actions → « Déploiement GitHub Pages » → _Run workflow_.
-- **Rollback** : `git revert <sha>` sur `main` puis push (le workflow republie l'état précédent).
-  Éviter de réécrire l'historique de `main`.
+Fournir un `.env.example` sans valeur réelle.
+
+## Backend — Apps Script
+
+1. Ouvrir la feuille → `Extensions → Apps Script`.
+2. Coller les fichiers de `backend/apps-script/`.
+3. Renseigner les propriétés du script (`TURNSTILE_SECRET`, `SHEET_ID`, `ALLOWED_ORIGINS`).
+4. `Déployer → Nouveau déploiement → Application web` :
+   - Exécuter en tant que : **moi**
+   - Qui a accès : **tout le monde**
+5. Copier l'URL `/exec`.
+6. Après chaque modification : `Gérer les déploiements → Modifier → Nouvelle version`.
+
+> L'URL `/exec` est publique par nature. La protection repose sur Turnstile, la validation et le
+> rate limit — pas sur le secret de l'URL.
+
+## Cloudflare Turnstile
+
+1. Dashboard Cloudflare → Turnstile → `Add site`.
+2. Domaines : `oliviersud.github.io` + `localhost`.
+3. Mode **Managed**.
+4. Site Key → `VITE_TURNSTILE_SITE_KEY` ; Secret Key → `TURNSTILE_SECRET` (Apps Script).
+5. Vérifier dans le dashboard que les requêtes arrivent (taux de succès).
+
+## Domaines et HTTPS
+
+- GitHub Pages fournit HTTPS automatiquement.
+- Domaine personnalisé : `public/CNAME`, DNS `CNAME` vers `<user>.github.io`, `VITE_BASE_PATH=/`.
+- Turnstile : ajouter le domaine personnalisé à la liste autorisée.
+
+## Rollback
+
+- Frontend : `git revert <sha>` sur `main` puis push (redéploiement automatique).
+- Backend : `Gérer les déploiements` → sélectionner une version antérieure → redéployer.
+- Données : restaurer une copie de la feuille (sauvegarde manuelle).
 
 ## Dépannage
 
-| Symptôme                                    | Cause probable                              | Solution                                                     |
-| ------------------------------------------- | ------------------------------------------- | ------------------------------------------------------------ |
-| Page blanche, erreurs 404 sur `/assets/*`   | `base` incorrect                            | Vérifier `VITE_BASE_PATH` et le nom du dépôt                 |
-| CSS/JS chargés mais application vide        | `index.html` non servi à la racine du base  | Vérifier `start_url` / redirection `404.html`                |
-| Ancienne version affichée                   | Service worker en cache                     | Attendre la bannière, ou DevTools → Unregister + hard reload |
-| `configure-pages` échoue                    | Pages non activé en « GitHub Actions »      | Settings → Pages → Source : GitHub Actions                   |
-| `npm ci` échoue en CI                       | `package-lock.json` absent ou désynchronisé | `npm install` en local puis commit du lockfile               |
-| Déploiement bloqué « waiting for approval » | Environnement protégé                       | Approuver dans l'onglet Actions ou assouplir la règle        |
+| Symptôme                             | Cause probable                               | Solution                                         |
+| ------------------------------------ | -------------------------------------------- | ------------------------------------------------ |
+| Page blanche, 404 sur `/assets/*`    | `base` incorrect                             | Vérifier `VITE_BASE_PATH` et le nom du dépôt     |
+| Ancienne version affichée            | Service worker en cache                      | Attendre, ou DevTools → Unregister + hard reload |
+| `configure-pages` échoue             | Pages non activé en « GitHub Actions »       | Settings → Pages → Source                        |
+| `npm ci` échoue en CI                | Lockfile absent/désynchronisé                | `npm install` en local + commit                  |
+| Erreur CORS sur POST                 | Preflight `OPTIONS` non géré par Apps Script | POST en `text/plain`, ou Worker proxy            |
+| `{ ok:false, error:"captcha" }`      | Site key/secret erronés, domaine absent      | Vérifier les deux clés et les domaines Turnstile |
+| `{ ok:false, error:"rate_limited" }` | Plus de 5 ajouts/heure                       | Attendre, ou ajuster le seuil (avec validation)  |
+| Données absentes                     | `statut != publie` ou cache 5 min            | Vérifier la colonne `statut`, vider le cache     |
+| Quota Apps Script dépassé            | Trop d'appels `UrlFetch`/jour                | Réduire les appels, augmenter le cache           |
 
-## Vérifications après déploiement
+## Checklist de mise en production
 
-- [ ] L'URL de production affiche la ludothèque
-- [ ] Le manifest est accessible : `/<base>/manifest.webmanifest`
-- [ ] `/<base>/sw.js` répond en 200
-- [ ] Lighthouse → catégorie _PWA_ sans erreur bloquante
-- [ ] Installation possible (Chrome/Edge : icône dans la barre d'adresse)
-- [ ] Mode avion : rechargement OK, données persistées conservées
+- [ ] CI verte sur `main`
+- [ ] Variables GitHub renseignées
+- [ ] Secret Turnstile uniquement dans Apps Script
+- [ ] Déploiement Apps Script à jour (nouvelle version)
+- [ ] Manifest et `sw.js` accessibles en production
+- [ ] Test d'ajout réel réussi
+- [ ] Mentions légales et confidentialité en ligne
+- [ ] Rollback testé (au moins une fois)
