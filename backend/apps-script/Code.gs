@@ -43,6 +43,10 @@ function doPost(e) {
 }
 
 function jsonResponse(object) {
+  // Apps Script ne supporte pas les requêtes OPTIONS (preflight CORS).
+  // Le mode "Content-Type: text/plain" en POST contourne le preflight (simple request).
+  // Le header Access-Control-Allow-Origin est automatiquement géré par Apps Script
+  // lorsque le Web App est déployé avec accès "Tout le monde (anonyme)".
   return ContentService.createTextOutput(JSON.stringify(object)).setMimeType(
     ContentService.MimeType.JSON,
   );
