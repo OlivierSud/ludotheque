@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Ludothèque">
+  <rect width="64" height="64" rx="14" fill="#1b1b2f" />
+  <circle cx="24" cy="24" r="7" fill="#ffc857" />
+  <circle cx="41" cy="24" r="7" fill="#7c5cff" />
+  <circle cx="24" cy="41" r="7" fill="#2ec4b6" />
+  <circle cx="41" cy="41" r="7" fill="#ff6b6b" />
+</svg>

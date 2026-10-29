@@ -1,0 +1,70 @@
+name: Déploiement GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Autorise le job de déploiement à publier sur GitHub Pages via OIDC.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Un seul déploiement à la fois, sans annuler celui en cours.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@v5
+
+      - name: Installation de Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Installation des dépendances
+        run: npm ci
+
+      - name: Analyse statique
+        run: npm run lint
+
+      - name: Vérification des types
+        run: npm run typecheck
+
+      - name: Tests unitaires
+        run: npm run test
+
+      - name: Build de production
+        run: npm run build
+        env:
+          # `vars.VITE_BASE_PATH` permet de surcharger le chemin (domaine
+          # personnalisé ou dépôt `<user>.github.io`). Sinon : /<nom-du-depot>/
+          VITE_BASE_PATH: ${{ vars.VITE_BASE_PATH || format('/{0}/', github.event.repository.name) }}
+
+      - name: Configuration de GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Préparation de l'artefact Pages
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
+  deploy:
+    name: Déploiement
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Déploiement sur GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Page introuvable — Ludothèque</title>
+    <meta name="robots" content="noindex" />
+    <script>
+      // GitHub Pages ne connaît pas le routage côté client : toute URL inconnue
+      // est servie via ce fichier. On renvoie l'utilisateur vers l'application.
+      // Si un routeur est ajouté plus tard, remplacer par la technique
+      // « spa-github-pages » décrite dans docs/deployment.md.
+      (function () {
+        var segments = window.location.pathname.split('/').filter(Boolean);
+        var base = segments.length > 0 ? '/' + segments[0] + '/' : '/';
+        window.location.replace(base);
+      })();
+    </script>
+    <style>
+      body {
+        margin: 0;
+        display: grid;
+        place-items: center;
+        min-height: 100dvh;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        color: #f4f4f8;
+        background: #14141f;
+      }
+      a {
+        color: #ffc857;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Page introuvable</h1>
+      <p>Redirection vers la ludothèque… <a href="./">Continuer</a></p>
+    </main>
+  </body>
+</html>
