@@ -3,7 +3,11 @@ import { colorHex, colorText } from '@/lib/colors';
 import { useData } from '@/context/DataContext';
 import { useFilters } from '@/context/FiltersContext';
 
-export function Filters() {
+interface FiltersProps {
+  readonly hideHeader?: boolean;
+}
+
+export function Filters({ hideHeader = false }: FiltersProps) {
   const { data } = useData();
   const { selection, toggle, clear, activeCount } = useFilters();
 
@@ -11,14 +15,16 @@ export function Filters() {
 
   return (
     <section className="filters" aria-label="Filtres">
-      <div className="filters__header">
-        <span className="filters__section-title">Filtres</span>
-        {activeCount > 0 && (
-          <button type="button" className="filters__clear-btn" onClick={clear}>
-            Réinitialiser ({activeCount})
-          </button>
-        )}
-      </div>
+      {!hideHeader && (
+        <div className="filters__header">
+          <span className="filters__section-title">Filtres</span>
+          {activeCount > 0 && (
+            <button type="button" className="filters__clear-btn" onClick={clear}>
+              Réinitialiser ({activeCount})
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="filters__list">
         {data.criteres.map((critere: Critere) => {

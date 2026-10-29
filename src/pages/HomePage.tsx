@@ -5,13 +5,15 @@ import { filterGames, gameColor } from '@/lib/filterGames';
 import { useData } from '@/context/DataContext';
 import { useFilters } from '@/context/FiltersContext';
 import { Filters } from '@/components/Filters';
+import { FiltersModal } from '@/components/FiltersModal';
 import { GameCard } from '@/components/GameCard';
 
 export function HomePage() {
   const { data, loading, error, refresh } = useData();
-  const { selection } = useFilters();
+  const { selection, activeCount, clear } = useFilters();
   const navigate = useNavigate();
   const [toast, setToast] = useState<string | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const timerRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -36,6 +38,27 @@ export function HomePage() {
     timerRef.current = window.setTimeout(() => setToast(null), 2500);
   };
 
+  // Filtres actifs à afficher en résumé (mobile)
+  const activeChips = useMemo(() => {
+    if (data === null) return [];
+    const chips: Array<{ critereId: string; optionId: string; label: string; couleur: string }> =
+      [];
+    for (const critere of data.criteres) {
+      const ids = selection[critere.id] ?? [];
+      for (const optionId of ids) {
+        const option = critere.options.find((o) => o.id === optionId);
+        if (option)
+          chips.push({
+            critereId: critere.id,
+            optionId,
+            label: option.libelle,
+            couleur: option.couleur,
+          });
+      }
+    }
+    return chips;
+  }, [data, selection]);
+
   return (
     <div className="screen__inner">
       {error !== null && data !== null && (
@@ -57,7 +80,58 @@ export function HomePage() {
 
       {data !== null && (
         <>
-          <Filters />
+          {/* Desktop : affichage compact des filtres intégré */}
+          <div className="home__filters-desktop">
+            <Filters />
+          </div>
+
+          {/* Mobile : bouton + résumé des filtres actifs */}
+          <div className="home__filters-mobile">
+            <button
+              type="button"
+              className="mobile-filters-btn"
+              onClick={() => setFiltersOpen(true)}
+              aria-expanded={filtersOpen}
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                aria-hidden="true"
+              >
+                <line x1="4" y1="6" x2="20" y2="6" />
+                <line x1="4" y1="12" x2="20" y2="12" />
+                <line x1="4" y1="18" x2="20" y2="18" />
+              </svg>
+              Filtres
+              {activeCount > 0 && <span className="mobile-filters-btn__badge">{activeCount}</span>}
+            </button>
+
+            {/* Résumé des filtres actifs */}
+            {activeChips.length > 0 && (
+              <div className="mobile-active-chips" aria-label="Filtres actifs">
+                {activeChips.map((chip) => (
+                  <span
+                    key={`${chip.critereId}-${chip.optionId}`}
+                    className="pill pill--active mobile-active-chip"
+                    style={{
+                      backgroundColor: `var(--c-${chip.couleur})`,
+                      color: chip.couleur === 'yellow' ? '#2b2b2b' : '#fff',
+                      borderColor: 'transparent',
+                    }}
+                  >
+                    ✓ {chip.label}
+                  </span>
+                ))}
+                <button type="button" className="filters__clear-btn" onClick={clear}>
+                  Tout effacer
+                </button>
+              </div>
+            )}
+          </div>
 
           <p className="section-label section-label--results">Résultats ({jeux.length})</p>
 
@@ -79,6 +153,8 @@ export function HomePage() {
           </section>
         </>
       )}
+
+      {filtersOpen && <FiltersModal onClose={() => setFiltersOpen(false)} />}
 
       {toast !== null && (
         <div className="toast" role="status">

@@ -1,7 +1,7 @@
 import { HashRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { DataProvider } from '@/context/DataContext';
 import { FiltersProvider } from '@/context/FiltersContext';
-import { BottomNav } from '@/components/BottomNav';
+import { MobileTabBar } from '@/components/MobileTabBar';
 import { HomePage } from '@/pages/HomePage';
 import { FiltersPage } from '@/pages/FiltersPage';
 import { DatabasePage } from '@/pages/DatabasePage';
@@ -89,7 +89,7 @@ function Shell() {
               </button>
             </div>
 
-            {/* Volet 2 : Base de données, édition, etc. */}
+            {/* Volet 2 : Liste des jeux, édition, etc. */}
             <div className="app__pane app__pane--database">
               <Routes>
                 <Route path="/liste" element={<DatabasePage />} />
@@ -111,7 +111,7 @@ function Shell() {
         )}
       </div>
 
-      <BottomNav />
+      <MobileTabBar />
     </div>
   );
 }

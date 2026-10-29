@@ -12,7 +12,7 @@ export function DatabasePage() {
     <div className="screen__inner">
       <header className="page-header">
         <div>
-          <h1 className="page-title">Base de données</h1>
+          <h1 className="page-title">Liste des jeux</h1>
         </div>
         <button
           type="button"
