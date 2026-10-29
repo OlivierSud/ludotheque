@@ -14,11 +14,11 @@ Séquence de travail. Pas de dates : chaque phase démarre quand la précédente
 | Phase | Nom                             | Statut      | Bloquant pour |
 | ----- | ------------------------------- | ----------- | ------------- |
 | 0     | Socle technique                 | ✅ Terminé  | —             |
-| 1     | Cadrage produit & design        | ⏳ En cours | Tout le reste |
-| 2     | Backend Sheets + Turnstile      | ⬜ À faire  | Phase 4       |
-| 3     | Frontend lecture                | ⬜ À faire  | Phase 4       |
-| 4     | Ajout d'un jeu                  | ⬜ À faire  | Phase 5       |
-| 5     | Réglages, PWA, mentions légales | ⬜ À faire  | Phase 6       |
+| 1     | Cadrage produit & design        | ✅ Partiel  | Tout le reste |
+| 2     | Backend Sheets + Turnstile      | ✅ Terminé  | —             |
+| 3     | Frontend lecture                | ✅ Terminé  | —             |
+| 4     | Ajout d'un jeu                  | ✅ Terminé  | —             |
+| 5     | Réglages, PWA, mentions légales | ⏳ En cours | Phase 6       |
 | 6     | Qualité, accessibilité, recette | ⬜ À faire  | Phase 7       |
 | 7     | Mise en production              | ⬜ À faire  | —             |
 | 8     | Itérations post-v1              | ⬜ À faire  | —             |
@@ -46,14 +46,15 @@ Séquence de travail. Pas de dates : chaque phase démarre quand la précédente
 
 **Objectif** : lever toutes les ambiguïtés avant d'écrire l'interface.
 
-- [ ] Recevoir les wireframes (mobile + desktop)
-- [ ] Recevoir la maquette (Figma ou équivalent) et les références de style
-- [ ] Extraire la palette, la typographie et les espacements (design tokens)
-- [ ] Confirmer les paliers responsive et la navigation (menu Réglages)
+- [x] Recevoir une maquette de principe (placement) — `gemini-code-1793275109642.html`
+- [ ] Recevoir les wireframes mobile + desktop et les références de style
+- [x] Extraire la palette et les espacements (design tokens)
+- [x] Confirmer la navigation mobile (barre d'onglets) — D-016
 - [ ] Valider la liste des filtres et des catégories
 - [x] Trancher Q1–Q4 (D-009 à D-012)
-- [ ] Trancher Q6, Q10 (`decisions.md`)
-- [ ] Mettre à jour `design.md` et `product.md`
+- [x] Trancher Q13–Q17 (D-013 à D-017)
+- [ ] Trancher Q6, Q10, Q11 (`decisions.md`)
+- [x] Mettre à jour `design.md` et `product.md`
 
 **Sortie** : maquette validée, jetons listés, décisions consignées.
 
@@ -121,17 +122,17 @@ GitHub Pages.
 
 **Objectif** : conformité et confort.
 
-- [ ] Écran Réglages (conforme maquette)
-- [ ] Entrée « Installer l'application » (Android/Chrome + instructions iOS)
-- [ ] Masquage si déjà installée
-- [ ] Mentions légales + politique de confidentialité
-- [ ] Version de l'application affichée
+- [x] Écran Réglages (conforme maquette)
+- [x] Entrée « Installer l'application » (Android/Chrome + instructions iOS)
+- [x] Masquage si déjà installée
+- [x] Mentions légales + politique de confidentialité conformes droit français (LCEN + RGPD)
+- [x] Version de l'application affichée
 - [ ] Vérification hors-ligne (lecture)
 - [ ] Comportement de mise à jour validé (Q9)
 
 **Sortie** : installation testée sur un appareil réel, pages légales accessibles.
 
-**Questions bloquantes** : Q7, Q9.
+**Questions bloquantes** : Q9.
 
 ---
 

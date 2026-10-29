@@ -91,7 +91,7 @@ Fournir un `.env.example` sans valeur réelle.
 
 1. Dashboard Cloudflare → Turnstile → `Add site`.
 2. Domaines : `oliviersud.github.io` + `localhost`.
-3. Mode **Managed**.
+3. Mode **Invisible**.
 4. Site Key → `VITE_TURNSTILE_SITE_KEY` ; Secret Key → `TURNSTILE_SECRET` (Apps Script).
 5. Vérifier dans le dashboard que les requêtes arrivent (taux de succès).
 

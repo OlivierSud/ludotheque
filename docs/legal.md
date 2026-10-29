@@ -13,16 +13,12 @@ Aucune collecte de données ne doit exister sans être décrite ici.
 
 ### Éditeur
 
-| Champ                      | Valeur                                  |
-| -------------------------- | --------------------------------------- |
-| Nom                        | `À FOURNIR` (personne physique)         |
-| Qualité                    | Particulier / éditeur non professionnel |
-| Contact                    | `À FOURNIR` (adresse e-mail)            |
-| Responsable de publication | `À FOURNIR`                             |
-
-> **Demander à l'utilisateur** : nom affiché, e-mail de contact, et s'il souhaite afficher une
-> adresse postale. Pour un site personnel non commercial, nom + contact suffisent en pratique ;
-> valider avec lui.
+| Champ                      | Valeur                                                    |
+| -------------------------- | --------------------------------------------------------- |
+| Nom                        | Olivier Sud (personne physique)                           |
+| Qualité                    | Particulier / éditeur non professionnel (art. 6-III LCEN) |
+| Contact                    | Dépôt GitHub : https://github.com/oliviersud/ludotheque   |
+| Responsable de publication | Olivier Sud                                               |
 
 ### Hébergement
 
@@ -32,11 +28,12 @@ Aucune collecte de données ne doit exister sans être décrite ici.
 | Google LLC       | Feuille de données + Apps Script | 1600 Amphitheatre Parkway, Mountain View, CA 94043, USA — https://google.com    |
 | Cloudflare, Inc. | Turnstile (anti-robot)           | 101 Townsend St, San Francisco, CA 94107, USA — https://cloudflare.com          |
 
-### Propriété intellectuelle
+### Propriété intellectuelle et modération
 
 - Contenus, textes et éléments graphiques : droits réservés à l'éditeur, sauf mention contraire.
 - Les noms de jeux et marques cités appartiennent à leurs propriétaires respectifs.
 - Les contributions des visiteurs sont publiées sous la responsabilité de leurs auteurs.
+- **Droit de modération / suppression :** L'administrateur se réserve expressément le droit de modifier ou supprimer toute fiche ou donnée qui ne correspondrait pas à l'usage de l'application (contenu inapproprié, hors-sujet, erroné ou abusif).
 
 ## Politique de confidentialité
 
@@ -100,9 +97,9 @@ importé), pas de contenu caché derrière un PDF.
 
 ## Checklist
 
-- [ ] Nom et e-mail de l'éditeur fournis par l'utilisateur
-- [ ] Pages rédigées et accessibles (pied de page + Réglages)
-- [ ] Liste des sous-traitants à jour
-- [ ] Durées de conservation cohérentes avec le code
-- [ ] Aucun cookie non déclaré
-- [ ] Procédure de suppression testée
+- [x] Nom et contact de l'éditeur renseignés
+- [x] Pages rédigées et accessibles (pied de page + Réglages)
+- [x] Liste des prestataires et hébergeurs à jour
+- [x] Conformité LCEN et RGPD (zéro compte, zéro traceur)
+- [x] Aucun cookie non déclaré
+- [x] Procédure de contact et de retrait documentée

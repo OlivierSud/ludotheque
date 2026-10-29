@@ -36,7 +36,7 @@ POST (jeu + jeton) ─────────────────▶ Apps S
 1. Créer un compte Cloudflare (gratuit) → `Turnstile` → `Add site`.
 2. Nom : `Ludothèque`.
 3. Domaines : `oliviersud.github.io` **et** `localhost`.
-4. Widget mode : **Managed** (recommandé).
+4. Widget mode : **Invisible** (totalement invisible pour les utilisateurs).
 5. Récupérer :
    - **Site Key** (publique) → `VITE_TURNSTILE_SITE_KEY`
    - **Secret Key** → propriété de script `TURNSTILE_SECRET` (jamais dans le dépôt)
@@ -69,7 +69,13 @@ Règles :
 - Un jeton ne peut servir qu'**une fois** : ne pas le mettre en cache.
 - En cas d'échec de `siteverify` (réseau), refuser l'écriture (`fail closed`).
 
-## Secrets
+## Édition publique (D-015)
+
+- Toute écriture (ajout, modification, ajout d'option) exige un jeton Turnstile valide.
+- Rate limit : 20 écritures/heure/IP (best-effort : Apps Script n'expose pas toujours l'IP du
+  visiteur ; le compteur peut alors être global).
+- Aucune suppression depuis l'interface : modération manuelle dans la feuille.
+- Le propriétaire doit surveiller la feuille et supprimer les lignes indésirables.
 
 | Secret                    | Où il vit                          | Visible client |
 | ------------------------- | ---------------------------------- | -------------- |

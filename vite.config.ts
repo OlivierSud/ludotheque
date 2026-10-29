@@ -15,6 +15,9 @@ const base = process.env.VITE_BASE_PATH ?? `/${REPO_NAME}/`;
 
 export default defineConfig({
   base,
+  define: {
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? '0.0.0'),
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
@@ -27,17 +30,17 @@ export default defineConfig({
       // L'enregistrement sera fait dans l'application via `virtual:pwa-register`
       // (voir docs/pwa.md) pour maîtriser la bannière de mise à jour.
       injectRegister: false,
-      includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
+      includeAssets: ['favicon.svg', 'favicon.png', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Ludothèque',
+        name: 'La Ludothèque',
         short_name: 'Ludothèque',
-        description: 'Application web de gestion de ludothèque.',
+        description: 'Le répertoire des jeux pédagogiques.',
         lang: 'fr',
         dir: 'ltr',
         display: 'standalone',
         orientation: 'portrait',
-        theme_color: '#1b1b2f',
-        background_color: '#1b1b2f',
+        theme_color: '#005b9f',
+        background_color: '#f8f8f8',
         start_url: base,
         scope: base,
         categories: ['games', 'entertainment', 'lifestyle'],
@@ -64,6 +67,17 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,ico,webmanifest}'],
         navigateFallback: `${base}index.html`,
         cleanupOutdatedCaches: true,
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/script\.google\.com\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'ludotheque-api',
+              networkTimeoutSeconds: 10,
+              expiration: { maxEntries: 10, maxAgeSeconds: 86400 },
+            },
+          },
+        ],
       },
       devOptions: {
         enabled: false,

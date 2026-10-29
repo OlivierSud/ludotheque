@@ -18,11 +18,13 @@ rechercher un jeu, en ajouter un — **sans compte, sans friction**, sur mobile 
 ### Inclus
 
 - Consulter la liste des jeux (lecture publique).
-- Rechercher et filtrer (texte, catégorie, nombre de joueurs, durée, âge).
-- Consulter la fiche d'un jeu.
+- Rechercher et filtrer (critères et options lus à l'exécution depuis la feuille).
+- Consulter la fiche d'un jeu (lien externe).
 - Ajouter un jeu via un formulaire (écriture publique, protégée par Turnstile).
+- Modifier un jeu existant et ajouter des options (écriture publique, protégée par Turnstile).
 - Menu **Réglages** : installation PWA, mentions légales, confidentialité, version.
 - Fonctionnement hors ligne en lecture (PWA installée).
+- Navigation mobile par barre d'onglets (Jeux / Filtres / Liste).
 
 ### Exclu (v1)
 
@@ -40,9 +42,10 @@ Toute demande hors périmètre suit le protocole « demander avant » (`AGENTS.m
 | ----- | --------------------------------------------------------------------- | -------- |
 | FR-1  | Afficher la liste des jeux avec un état de chargement et un état vide | Must     |
 | FR-2  | Rechercher par titre, description et tags (insensible casse/accents)  | Must     |
-| FR-3  | Filtrer par catégorie, nombre de joueurs, durée et âge                | Must     |
-| FR-4  | Afficher la fiche détaillée d'un jeu                                  | Must     |
+| FR-3  | Filtrer par critères dynamiques (valeurs lues depuis la feuille)      | Must     |
+| FR-4  | Afficher la fiche d'un jeu (lien externe)                             | Must     |
 | FR-5  | Ajouter un jeu via un formulaire validé                               | Must     |
+| FR-6  | Modifier un jeu et ajouter des options                                | Must     |
 | FR-6  | Protéger l'ajout par Cloudflare Turnstile                             | Must     |
 | FR-7  | Proposer l'installation PWA dans le menu Réglages                     | Must     |
 | FR-8  | Afficher les mentions légales et la politique de confidentialité      | Must     |

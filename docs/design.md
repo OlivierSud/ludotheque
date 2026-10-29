@@ -89,14 +89,55 @@ Les couleurs vives imposent des précautions :
 6. Corriger les écarts ; documenter tout écart validé.
 7. Faire valider avant de passer à l'écran suivant.
 
-## Écarts et décisions
+## Maquette reçue — principe de placement (2026-10-29)
 
-Tout écart (composant indisponible, contraste insuffisant, contrainte technique) est :
+Source : `gemini-code-1793275109642.html` (fichier fourni par l'utilisateur). Le style est
+provisoire et pourra évoluer ; la **structure et le placement** font foi.
 
-1. expliqué avec une capture ou un extrait,
-2. proposé sous forme d'options,
-3. validé par l'utilisateur,
-4. consigné dans [`decisions.md`](./decisions.md).
+### Palette extraite
+
+| Clé      | Hex     | Usage dans la maquette           |
+| -------- | ------- | -------------------------------- |
+| `olive`  | #4B6A4A | barre latérale d'un jeu          |
+| `blue`   | #005B9F | onglet « Liste des jeux »        |
+| `teal`   | #00959F | actif « Tag B », barres, boutons |
+| `purple` | #8B73A3 | (accent)                         |
+| `pink`   | #F26D7D | barre « Jeu de Français »        |
+| `yellow` | #FFC222 | onglet « Filtres »               |
+| `orange` | #E25822 | actif « Niveau 1 »               |
+| surface  | #F8F8F8 | fond de la carte                 |
+| fond     | #D1D3D4 | fond de page                     |
+| texte    | #2B2B2B | texte principal                  |
+
+Typographie : Helvetica Neue (système) ; pas de webfont payante.
+
+### Disposition desktop (carte centrée, max 1024 px, hauteur 85 vh)
+
+- En-tête permanent : titre « La Ludothèque » + sous-titre « Le répertoire des jeux pédagogiques » + bouton réglages, toujours visible au sommet de la carte (décision D-021).
+- Section **Filtres** : affichage compact limité au premier quart de l'écran (`max-height: 25%`, décision D-022) avec lignes épurées par critère, pastilles réduites et bouton de réinitialisation rapide pour maximiser la hauteur consacrée aux résultats de jeux.
+- Section **Résultats** : affichage en empilement de livres (`.book-stack`, décision D-020) avec bordure gauche colorée, losange `◆`, bouton `i`, et légère rotation/décalage aléatoires déterministes.
+- Système de volets coulissants (décision D-021) : rail coulissant en dessous du titre. En vue Filtres, la double colonne d'onglets (jaune « Filtres » et bleu « Liste des jeux ») est calée à droite ; en vue Liste des jeux, elle est calée à gauche. L'onglet actif est fortement accentué.
+  - Sous-vue **Base de données** : même style unifié en pile de livres que les résultats (décision D-020).
+  - Sous-vue **Édition du jeu** : retour, nom (lecture seule dans la maquette), lien, critères
+    avec crayon, modale de sélection, bouton « + » pour ajouter une option.
+- Modale : options en radio/checkbox, bouton « + » circulaire.
+- Toast bas : « Ouverture de : … » + « Annuler ».
+
+### Mobile (décision D-016)
+
+Barre d'onglets basse « Jeux / Filtres / Liste ». Les onglets verticaux sont masqués.
+
+### Écarts validés
+
+- Bouton « Enregistrer » dans l'en-tête du formulaire et « Nouveau jeu » dans la liste
+  (D-017), absents de la maquette.
+- Les critères et options sont dynamiques (D-014) : la maquette en montre 3 à titre d'exemple.
+
+### À confirmer avec l'utilisateur
+
+- Style final (palette, typo) : la maquette est provisoire.
+- Références de style (sites, applications) : toujours demandées.
+- États vide, chargement, erreur : non représentés, à concevoir dans l'esprit de la maquette.
 
 ## Livrables attendus dans le dépôt
 

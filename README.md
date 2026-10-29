@@ -7,10 +7,10 @@ Google Sheet via un Web App Google Apps Script, et protège les écritures avec 
 [![CI](https://github.com/OlivierSud/ludotheque/actions/workflows/ci.yml/badge.svg)](https://github.com/OlivierSud/ludotheque/actions/workflows/ci.yml)
 [![Déploiement](https://github.com/OlivierSud/ludotheque/actions/workflows/deploy.yml/badge.svg)](https://github.com/OlivierSud/ludotheque/actions/workflows/deploy.yml)
 
-> **État du projet : cadrage.**
-> Le socle technique est prêt (build, qualité, CI/CD, PWA, serveur local). L'interface sera
-> développée à partir des wireframes et de la maquette à venir. Voir la
-> [roadmap](docs/roadmap.md).
+> **État du projet : implémentation v1 en cours.**
+> Le socle technique est prêt et une première interface est livrée à partir de la maquette reçue
+> (placement). Les critères et options sont lus à l'exécution depuis Google Sheets. Style
+> provisoire, en attente de la maquette définitive. Voir la [roadmap](docs/roadmap.md).
 
 ## Principes
 
@@ -32,6 +32,7 @@ Google Sheet via un Web App Google Apps Script, et protège les écritures avec 
 | ----------- | ---------------------------------------------------------------------- | ---- |
 | Build       | [Vite](https://vite.dev/) 8                                            | 0 €  |
 | UI          | [React](https://react.dev/) 19 + TypeScript strict                     | 0 €  |
+| Routage     | [react-router](https://reactrouter.com/) (HashRouter)                  | 0 €  |
 | Styles      | CSS natif + design tokens issus de la maquette                         | 0 €  |
 | PWA         | [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) (Workbox)         | 0 €  |
 | Backend     | Google Apps Script (Web App)                                           | 0 €  |
@@ -101,7 +102,8 @@ vérifie Node.js, installe les dépendances si besoin, démarre le serveur et ou
 ├── public/               # 404.html, favicon, icônes PWA (provisoires)
 ├── src/                  # accueillera le code de l'application
 ├── index.html            # coquille HTML (#root)
-├── start-local.cmd       # lanceur Windows
+├── start-local.cmd       # lanceur Windows (serveur local)
+├── update-graphify.cmd   # script Windows pour mettre à jour le graphe Graphify
 ├── AGENTS.md             # point d'entrée des agents IA
 └── vite.config.ts
 ```

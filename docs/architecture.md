@@ -44,6 +44,7 @@ utilisateur.
 | ----------- | ---------------------------------------- | ---- |
 | Build       | Vite 8                                   | 0 €  |
 | UI          | React 19 + TypeScript strict             | 0 €  |
+| Routage     | react-router en `HashRouter` (D-011)     | 0 €  |
 | Styles      | CSS natif + design tokens de la maquette | 0 €  |
 | PWA         | vite-plugin-pwa (Workbox)                | 0 €  |
 | Routage     | react-router en `HashRouter` (D-011)     | 0 €  |
@@ -81,6 +82,7 @@ expire). Vérifier les quotas avant d'adopter un service.
 │   └── types.ts
 ├── index.html
 ├── start-local.cmd
+├── update-graphify.cmd
 └── vite.config.ts
 ```
 

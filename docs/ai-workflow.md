@@ -39,11 +39,13 @@ poste :
 - serveur MCP déclaré dans `opencode.json` ;
 - graphe construit : `graphify-out/graph.json`.
 
-Le binaire `graphify` n'est pas toujours dans le `PATH` sous Windows : utiliser `python -m graphify`.
+Le binaire `graphify` n'est pas toujours dans le `PATH` sous Windows : utiliser `python -m graphify` ou le lanceur `update-graphify.cmd`.
 
 ```bash
 # Construction / mise à jour du graphe (sans LLM)
 python -m graphify update .
+# ou directement sous Windows :
+update-graphify.cmd
 
 # Interrogation
 python -m graphify query "où est validée l'écriture d'un jeu ?"
