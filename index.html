@@ -10,6 +10,14 @@
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <!-- Capture beforeinstallprompt le plus tôt possible, avant que React monte. -->
+    <script>
+      window.__pwaInstallEvent = null;
+      window.addEventListener('beforeinstallprompt', function (e) {
+        e.preventDefault();
+        window.__pwaInstallEvent = e;
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
