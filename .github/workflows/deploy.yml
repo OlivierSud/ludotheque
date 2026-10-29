@@ -45,13 +45,10 @@ jobs:
       - name: Build de production
         run: npm run build
         env:
+          VITE_BASE_PATH: ${{ vars.VITE_BASE_PATH || format('/{0}/', github.event.repository.name) }}
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
           # `vars.VITE_BASE_PATH` permet de surcharger le chemin (domaine
           # personnalisé ou dépôt `<user>.github.io`). Sinon : /<nom-du-depot>/
-          VITE_BASE_PATH: ${{ vars.VITE_BASE_PATH || format('/{0}/', github.event.repository.name) }}
-          # URL du Web App Apps Script (Google Sheets backend).
-          # À définir dans : Settings → Secrets and variables → Actions → New repository secret
-          # Nom : VITE_API_URL  |  Valeur : https://script.google.com/macros/s/.../exec
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
       - name: Configuration de GitHub Pages
         uses: actions/configure-pages@v5
