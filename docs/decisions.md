@@ -280,6 +280,24 @@ doit pas être implémentée.
 - **Conséquences** : action de maintenance sans perte de données métier (Google Sheets) ; un
   rechargement est nécessaire pour réactiver le service worker et le cache hors ligne.
 
+### D-029 — Sortir du formulaire sans attendre le rafraîchissement complet
+
+- **Statut** : accepté
+- **Date** : 2026-11-04
+- **Contexte** : après une écriture, le formulaire attendait `refresh()` — un `GET ?action=data`
+  qui relit critères, couleurs et tous les jeux — avant de naviguer. L'enregistrement semblait
+  durer plusieurs secondes alors que la ligne était déjà écrite.
+- **Décision** : `handleSave` ne bloque plus sur `refresh()` ; il le lance en arrière-plan
+  (`void refresh()`) et rend la main immédiatement. `DataContext.refresh` ignore toute réponse
+  qui n'est pas celle de la dernière demande, pour que deux rafraîchissements qui se chevauchent
+  ne réappliquent pas des données plus anciennes.
+- **Alternatives** : écrire la ligne en un seul `setValues` côté Apps Script (gain plus important
+  mais modification du backend refusée par le mainteneur) ; supprimer le rafraîchissement
+  (la liste resterait périmée).
+- **Conséquences** : la liste peut afficher l'état en cache pendant ~0,5–1,5 s après le retour,
+  puis se mettre à jour seule. En cas d'échec du rafraîchissement, un bandeau d'erreur apparaît
+  sur la liste alors que l'écriture a bien réussi. Aucun changement de contrat API.
+
 ## Questions ouvertes
 
 | #   | Question                                                           | Impact                   | Bloquant         |
