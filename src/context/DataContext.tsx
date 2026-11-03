@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { LudothequeData } from '@/types';
 import { parseData } from '@/lib/parse';
@@ -41,18 +41,25 @@ export function DataProvider({ children }: { readonly children: ReactNode }) {
   const [data, setData] = useState<LudothequeData | null>(() => readCache());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Plusieurs rafraîchissements peuvent se chevaucher (ex. après un enregistrement) :
+  // seule la réponse de la dernière demande est appliquée, pour ne pas réécrire des données plus récentes.
+  const latestRequest = useRef(0);
 
   const refresh = useCallback(async () => {
+    const requestId = latestRequest.current + 1;
+    latestRequest.current = requestId;
     setLoading(true);
     try {
       const next = await fetchData();
+      if (requestId !== latestRequest.current) return;
       setData(next);
       setError(null);
       writeCache(next);
     } catch (cause) {
+      if (requestId !== latestRequest.current) return;
       setError(cause instanceof ApiError ? cause.code : 'server');
     } finally {
-      setLoading(false);
+      if (requestId === latestRequest.current) setLoading(false);
     }
   }, []);
 

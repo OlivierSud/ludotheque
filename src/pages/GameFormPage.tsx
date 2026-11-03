@@ -97,7 +97,9 @@ function GameForm({ isNew, existing, dataCriteres }: FormProps) {
     try {
       if (isNew) await createGame(normalizedDraft, meta);
       else if (existing !== null) await updateGame(existing.id, normalizedDraft, meta);
-      await refresh();
+      // Le GET complet d'Apps Script est lent : on ne bloque plus la sortie dessus.
+      // La liste se met à jour dès que la réponse arrive (le cache reste affiché entre-temps).
+      void refresh();
       return true;
     } catch (cause) {
       setMessage(errorMessage(cause));
