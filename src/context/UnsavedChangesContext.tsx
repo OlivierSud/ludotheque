@@ -32,6 +32,7 @@ export function UnsavedChangesProvider({ children }: { readonly children: ReactN
   const guardRef = useRef<UnsavedGuard | null>(null);
   const [pendingTo, setPendingTo] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const register = useCallback((guard: UnsavedGuard) => {
     guardRef.current = guard;
@@ -63,21 +64,33 @@ export function UnsavedChangesProvider({ children }: { readonly children: ReactN
     return () => window.removeEventListener('beforeunload', onBeforeUnload);
   }, []);
 
-  const close = useCallback(() => setPendingTo(null), []);
+  const close = useCallback(() => {
+    setPendingTo(null);
+    setSaveError(null);
+  }, []);
 
   const saveAndGo = async () => {
     const guard = guardRef.current;
     if (guard === null || pendingTo === null) return;
     setSaving(true);
+    setSaveError(null);
     const saved = await guard.save();
     setSaving(false);
-    setPendingTo(null);
-    if (saved) navigate(pendingTo);
+    if (saved) {
+      setPendingTo(null);
+      navigate(pendingTo);
+      return;
+    }
+    // On garde la popup ouverte : la fermer donnerait l'illusion d'une sauvegarde.
+    setSaveError(
+      "L'enregistrement a échoué. Fermez cette fenêtre pour voir le détail dans le formulaire, puis réessayez.",
+    );
   };
 
   const goWithoutSaving = () => {
     const to = pendingTo;
     setPendingTo(null);
+    setSaveError(null);
     if (to !== null) navigate(to);
   };
 
@@ -95,6 +108,11 @@ export function UnsavedChangesProvider({ children }: { readonly children: ReactN
             Ce jeu contient des modifications non enregistrées. Voulez-vous les enregistrer avant de
             quitter ?
           </p>
+          {saveError !== null && (
+            <p className="form-message form-message--error" role="alert">
+              {saveError}
+            </p>
+          )}
           <div className="modal__actions">
             <button
               type="button"
