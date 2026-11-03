@@ -55,6 +55,11 @@ Conséquences :
 
 Les valeurs `VITE_*` finissent **dans le bundle** : ne jamais y mettre un secret.
 
+Le workflow `deploy.yml` injecte ces variables au build. `VITE_TURNSTILE_SITE_KEY` peut être
+stockée en **variable** (recommandé, la clé de site est publique) ou en **secret** (repli).
+**Si elle manque**, le captcha n'est pas rendu, le formulaire affiche « Captcha non configuré » et
+aucune écriture n'aboutit : les boutons « Enregistrer » restent sans effet.
+
 ### Secrets
 
 | Nom                | Où                               |
@@ -109,17 +114,18 @@ Fournir un `.env.example` sans valeur réelle.
 
 ## Dépannage
 
-| Symptôme                             | Cause probable                               | Solution                                         |
-| ------------------------------------ | -------------------------------------------- | ------------------------------------------------ |
-| Page blanche, 404 sur `/assets/*`    | `base` incorrect                             | Vérifier `VITE_BASE_PATH` et le nom du dépôt     |
-| Ancienne version affichée            | Service worker en cache                      | Attendre, ou DevTools → Unregister + hard reload |
-| `configure-pages` échoue             | Pages non activé en « GitHub Actions »       | Settings → Pages → Source                        |
-| `npm ci` échoue en CI                | Lockfile absent/désynchronisé                | `npm install` en local + commit                  |
-| Erreur CORS sur POST                 | Preflight `OPTIONS` non géré par Apps Script | POST en `text/plain`, ou Worker proxy            |
-| `{ ok:false, error:"captcha" }`      | Site key/secret erronés, domaine absent      | Vérifier les deux clés et les domaines Turnstile |
-| `{ ok:false, error:"rate_limited" }` | Plus de 5 ajouts/heure                       | Attendre, ou ajuster le seuil (avec validation)  |
-| Données absentes                     | `statut != publie` ou cache 5 min            | Vérifier la colonne `statut`, vider le cache     |
-| Quota Apps Script dépassé            | Trop d'appels `UrlFetch`/jour                | Réduire les appels, augmenter le cache           |
+| Symptôme                                            | Cause probable                               | Solution                                         |
+| --------------------------------------------------- | -------------------------------------------- | ------------------------------------------------ |
+| Page blanche, 404 sur `/assets/*`                   | `base` incorrect                             | Vérifier `VITE_BASE_PATH` et le nom du dépôt     |
+| Ancienne version affichée                           | Service worker en cache                      | Attendre, ou DevTools → Unregister + hard reload |
+| `configure-pages` échoue                            | Pages non activé en « GitHub Actions »       | Settings → Pages → Source                        |
+| `npm ci` échoue en CI                               | Lockfile absent/désynchronisé                | `npm install` en local + commit                  |
+| Erreur CORS sur POST                                | Preflight `OPTIONS` non géré par Apps Script | POST en `text/plain`, ou Worker proxy            |
+| « Captcha non configuré » et Enregistrer sans effet | `VITE_TURNSTILE_SITE_KEY` absente du build   | Renseigner la variable GitHub puis redéployer    |
+| `{ ok:false, error:"captcha" }`                     | Site key/secret erronés, domaine absent      | Vérifier les deux clés et les domaines Turnstile |
+| `{ ok:false, error:"rate_limited" }`                | Plus de 5 ajouts/heure                       | Attendre, ou ajuster le seuil (avec validation)  |
+| Données absentes                                    | `statut != publie` ou cache 5 min            | Vérifier la colonne `statut`, vider le cache     |
+| Quota Apps Script dépassé                           | Trop d'appels `UrlFetch`/jour                | Réduire les appels, augmenter le cache           |
 
 ## Checklist de mise en production
 

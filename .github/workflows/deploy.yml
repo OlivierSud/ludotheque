@@ -38,6 +38,9 @@ jobs:
         env:
           VITE_BASE_PATH: ${{ vars.VITE_BASE_PATH || format('/{0}/', github.event.repository.name) }}
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          # Clé publique Turnstile : sans elle, le captcha n'est pas rendu et
+          # toutes les écritures sont bloquées côté client.
+          VITE_TURNSTILE_SITE_KEY: ${{ vars.VITE_TURNSTILE_SITE_KEY || secrets.VITE_TURNSTILE_SITE_KEY }}
           # `vars.VITE_BASE_PATH` permet de surcharger le chemin (domaine
           # personnalisé ou dépôt `<user>.github.io`). Sinon : /<nom-du-depot>/
 
