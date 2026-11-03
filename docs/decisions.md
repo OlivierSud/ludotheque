@@ -266,6 +266,20 @@ doit pas être implémentée.
   passent par le garde. Le bouton « précédent » du navigateur entre deux routes internes n'est
   pas intercepté (limite du `HashRouter` déclaratif).
 
+### D-028 — Bouton « Vider le cache et recharger » dans les Réglages
+
+- **Statut** : accepté
+- **Date** : 2026-11-03
+- **Contexte** : après un déploiement, le service worker ou le cache HTTP pouvaient continuer à
+  servir une ancienne version, sans moyen simple de forcer la mise à jour depuis l'interface.
+- **Décision** : ajouter dans Réglages → « Données et cache » un bouton qui supprime les clés
+  `localStorage` préfixées `ludotheque:`, vide `Cache Storage`, désenregistre les service
+  workers, puis recharge la page.
+- **Alternatives** : notification de mise à jour PWA (Q9 toujours ouverte) ; commandes
+  développeur (inaccessibles au public).
+- **Conséquences** : action de maintenance sans perte de données métier (Google Sheets) ; un
+  rechargement est nécessaire pour réactiver le service worker et le cache hors ligne.
+
 ## Questions ouvertes
 
 | #   | Question                                                           | Impact                   | Bloquant         |

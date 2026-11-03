@@ -53,6 +53,7 @@ Toute demande hors périmètre suit le protocole « demander avant » (`AGENTS.m
 | FR-10 | Signaler les erreurs réseau et permettre de réessayer                 | Must     |
 | FR-11 | Afficher la version de l'application dans les Réglages                | Should   |
 | FR-12 | Prévenir avant de quitter un formulaire modifié                       | Must     |
+| FR-13 | Vider le cache du navigateur et recharger depuis les Réglages         | Should   |
 
 ## Exigences non fonctionnelles
 

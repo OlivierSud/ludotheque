@@ -1,9 +1,21 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { clearSiteData } from '@/lib/clearSiteData';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 
 export function SettingsPage() {
   const navigate = useNavigate();
   const { canInstall, installed, isIos, install } = useInstallPrompt();
+  const [clearing, setClearing] = useState(false);
+
+  const clearAndReload = async () => {
+    setClearing(true);
+    try {
+      await clearSiteData();
+    } finally {
+      window.location.reload();
+    }
+  };
 
   return (
     <div className="screen__inner">
@@ -45,6 +57,26 @@ export function SettingsPage() {
               Installer
             </button>
           )}
+        </div>
+      </section>
+
+      <section className="settings-section">
+        <h2 className="settings-section__title">Données et cache</h2>
+        <div className="settings-row">
+          <div>
+            <p className="settings-row__label">Actualiser l'application</p>
+            <p className="settings-row__hint">
+              Vide le cache du navigateur et les données hors ligne, puis recharge la page.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() => void clearAndReload()}
+            disabled={clearing}
+          >
+            {clearing ? 'Suppression…' : 'Vider le cache et recharger'}
+          </button>
         </div>
       </section>
 

@@ -39,7 +39,20 @@ Règles :
 
 - `registerType: 'prompt'` : pas de rechargement silencieux.
 - Une notification de mise à jour est **à valider avec la maquette** (emplacement, forme).
-- Tant qu'elle n'est pas validée, ne pas afficher de bannière : l'utilisateur recharge simplement.
+- Tant qu'elle n'est pas validée, ne pas afficher de bannière : l'utilisateur rechargera via le
+  bouton des Réglages (ci-dessous).
+
+### Actualisation manuelle (Réglages)
+
+Réglages → section **Données et cache** → bouton « Vider le cache et recharger » :
+
+1. supprime les clés `localStorage` préfixées `ludotheque:` (données hors ligne) ;
+2. supprime tous les caches du navigateur (`Cache Storage`, précache Workbox + API) ;
+3. désenregistre les service workers ;
+4. recharge la page, ce qui réenregistre le service worker et retélécharge la dernière version.
+
+C'est le recours quand une ancienne version reste affichée malgré un déploiement. Les données
+métier vivent dans Google Sheets : rien n'est perdu côté utilisateur.
 
 ## Configuration technique
 
@@ -85,6 +98,8 @@ registerSW({ immediate: true });
 5. Cocher « Offline » → recharger : la liste s'affiche depuis le cache.
 6. Tenter un ajout hors ligne : message d'erreur explicite, aucune perte de saisie.
 7. Déployer une nouvelle version : vérifier le comportement de mise à jour retenu.
+8. Réglages → « Vider le cache et recharger » : la page se recharge, les caches et le service
+   worker sont recréés, la liste revient depuis l'API.
 
 ## Limites connues
 
