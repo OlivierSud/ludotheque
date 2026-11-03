@@ -2,6 +2,7 @@
 // Gestion de la lecture et de l'écriture dans les 2 onglets "jeux" et "criteres".
 
 const ALLOWED_COLORS = ['olive', 'blue', 'teal', 'purple', 'pink', 'yellow', 'orange'];
+const HEX_COLOR_RE = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
 
 function getSheetCaseInsensitive(ss, targetName) {
   const sheets = ss.getSheets();
@@ -73,6 +74,37 @@ function readCriteria(critSheet) {
   }
 
   return criteres;
+}
+
+// Colonne `couleurs` de l'onglet "criteres" : une couleur hexadécimale par cellule.
+// La liste est renvoyée telle quelle au client, qui tire une couleur stable par jeu.
+function readColors(critSheet) {
+  if (!critSheet) return [];
+  const lastRow = critSheet.getLastRow();
+  const lastCol = critSheet.getLastColumn();
+  if (lastRow < 2 || lastCol < 1) return [];
+
+  const headers = critSheet.getRange(1, 1, 1, lastCol).getValues()[0];
+  let colIdx = -1;
+  for (let c = 0; c < headers.length; c++) {
+    if (
+      String(headers[c] || '')
+        .trim()
+        .toLowerCase() === 'couleurs'
+    ) {
+      colIdx = c;
+      break;
+    }
+  }
+  if (colIdx === -1) return [];
+
+  const values = critSheet.getRange(2, colIdx + 1, lastRow - 1, 1).getValues();
+  const couleurs = [];
+  for (let r = 0; r < values.length; r++) {
+    const value = String(values[r][0] || '').trim();
+    if (HEX_COLOR_RE.test(value)) couleurs.push(value.toLowerCase());
+  }
+  return couleurs;
 }
 
 function readGames(jeuSheet, criteres) {
@@ -152,9 +184,10 @@ function readAll() {
   }
 
   const criteres = readCriteria(critSheet);
+  const couleurs = readColors(critSheet);
   const jeux = readGames(jeuSheet, criteres);
 
-  return { criteres: criteres, jeux: jeux };
+  return { criteres: criteres, jeux: jeux, couleurs: couleurs };
 }
 
 function handleCreateGame(body, clientKey) {

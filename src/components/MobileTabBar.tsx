@@ -1,10 +1,11 @@
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import { useUnsavedChanges } from '@/context/UnsavedChangesContext';
 
 const LIST_PATHS = ['/liste', '/jeu'];
 
 export function MobileTabBar() {
   const location = useLocation();
-  const navigate = useNavigate();
+  const { attemptNavigate } = useUnsavedChanges();
 
   const isListActive = LIST_PATHS.some(
     (p) => location.pathname === p || location.pathname.startsWith(`${p}/`),
@@ -18,7 +19,7 @@ export function MobileTabBar() {
         role="tab"
         aria-selected={isFiltersActive}
         className={`mobile-tab mobile-tab--filters ${isFiltersActive ? 'mobile-tab--active' : 'mobile-tab--inactive'}`}
-        onClick={() => navigate('/')}
+        onClick={() => attemptNavigate('/')}
       >
         Filtres
       </button>
@@ -27,7 +28,7 @@ export function MobileTabBar() {
         role="tab"
         aria-selected={isListActive}
         className={`mobile-tab mobile-tab--list ${isListActive ? 'mobile-tab--active' : 'mobile-tab--inactive'}`}
-        onClick={() => navigate('/liste')}
+        onClick={() => attemptNavigate('/liste')}
       >
         Liste des jeux
       </button>

@@ -1,4 +1,4 @@
-import type { ColorKey, JeuDraft, LudothequeData, Option } from '@/types';
+import type { JeuDraft, LudothequeData } from '@/types';
 import { parseData } from '@/lib/parse';
 
 const API_URL = (import.meta.env.VITE_API_URL ?? '').trim();
@@ -114,11 +114,8 @@ export async function updateGame(id: string, jeu: JeuDraft, meta: WriteMeta): Pr
 export async function createOption(
   critereId: string,
   libelle: string,
-  couleur: ColorKey,
   meta: WriteMeta,
-): Promise<Option> {
-  const raw = await request(writeBody('createOption', meta, { critereId, libelle, couleur }));
-  const id = assertOk(raw);
-  const ordre = typeof raw['ordre'] === 'number' ? raw['ordre'] : 0;
-  return { id, libelle, couleur, ordre };
+): Promise<string> {
+  const raw = await request(writeBody('createOption', meta, { critereId, libelle }));
+  return assertOk(raw);
 }

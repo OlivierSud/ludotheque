@@ -1,13 +1,15 @@
 /* eslint-disable react-hooks/refs */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import type { ColorKey, Jeu, JeuDraft, Option } from '@/types';
+import type { Jeu, JeuDraft } from '@/types';
 import { colorHex } from '@/lib/colors';
 import { validateJeu, hasErrors, normalizeLien, type FieldErrors } from '@/lib/validation';
 import { errorMessage } from '@/lib/errorMessage';
+import { isDraftDirty } from '@/lib/isDraftDirty';
 import { createGame, updateGame, createOption, type WriteMeta } from '@/services/api';
 import { useData } from '@/context/DataContext';
+import { useUnsavedChanges } from '@/context/UnsavedChangesContext';
 import { useTurnstile } from '@/hooks/useTurnstile';
 import { Modal } from '@/components/Modal';
 import { CriteriaPicker } from '@/components/CriteriaPicker';
@@ -21,12 +23,17 @@ interface FormProps {
 function GameForm({ isNew, existing, dataCriteres }: FormProps) {
   const { refresh } = useData();
   const navigate = useNavigate();
+  const { register, attemptNavigate } = useUnsavedChanges();
 
-  const [draft, setDraft] = useState<JeuDraft>(
-    existing === null
-      ? { nom: '', lien: '', criteres: {} }
-      : { nom: existing.nom, lien: existing.lien, criteres: existing.criteres },
+  const initialDraft = useMemo<JeuDraft>(
+    () =>
+      existing === null
+        ? { nom: '', lien: '', criteres: {} }
+        : { nom: existing.nom, lien: existing.lien, criteres: existing.criteres },
+    [existing],
   );
+
+  const [draft, setDraft] = useState<JeuDraft>(initialDraft);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [message, setMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -40,28 +47,29 @@ function GameForm({ isNew, existing, dataCriteres }: FormProps) {
 
   const onToken = useCallback((value: string) => setToken(value), []);
   const turnstile = useTurnstile(onToken);
+  const resetTurnstile = turnstile.reset;
 
   const activeCritere = dataCriteres.find((c) => c.id === openCritereId) ?? null;
 
-  const handleCreateOption = async (libelle: string, couleur: ColorKey): Promise<Option | null> => {
+  const handleCreateOption = async (libelle: string): Promise<string | null> => {
     if (token === '' || openCritereId === null) {
       setMessage('Merci de valider le captcha.');
       return null;
     }
     const meta: WriteMeta = { token, startedAt: startedAt.current, website };
     try {
-      const option = await createOption(openCritereId, libelle, couleur, meta);
+      const optionId = await createOption(openCritereId, libelle, meta);
       await refresh();
       setDraft((current) => {
         const currentIds = current.criteres[openCritereId] ?? [];
         return {
           ...current,
-          criteres: { ...current.criteres, [openCritereId]: [...currentIds, option.id] },
+          criteres: { ...current.criteres, [openCritereId]: [...currentIds, optionId] },
         };
       });
       turnstile.reset();
       setToken('');
-      return option;
+      return optionId;
     } catch (cause) {
       setMessage(errorMessage(cause));
       turnstile.reset();
@@ -70,7 +78,7 @@ function GameForm({ isNew, existing, dataCriteres }: FormProps) {
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async (): Promise<boolean> => {
     const normalizedDraft: JeuDraft = {
       ...draft,
       nom: draft.nom.trim(),
@@ -78,10 +86,10 @@ function GameForm({ isNew, existing, dataCriteres }: FormProps) {
     };
     const nextErrors = validateJeu(normalizedDraft);
     setErrors(nextErrors);
-    if (hasErrors(nextErrors)) return;
+    if (hasErrors(nextErrors)) return false;
     if (token === '') {
       setMessage('Merci de valider le captcha.');
-      return;
+      return false;
     }
     setSaving(true);
     setMessage(null);
@@ -90,20 +98,42 @@ function GameForm({ isNew, existing, dataCriteres }: FormProps) {
       if (isNew) await createGame(normalizedDraft, meta);
       else if (existing !== null) await updateGame(existing.id, normalizedDraft, meta);
       await refresh();
-      navigate('/liste');
+      return true;
     } catch (cause) {
       setMessage(errorMessage(cause));
-      turnstile.reset();
+      resetTurnstile();
       setToken('');
+      return false;
     } finally {
       setSaving(false);
     }
+  }, [draft, token, isNew, existing, refresh, website, resetTurnstile]);
+
+  const saveAndExit = async () => {
+    if (await handleSave()) navigate('/liste');
   };
+
+  // Le garde lit des refs : il reste valide même après de nouvelles saisies.
+  const dirtyRef = useRef(false);
+  const saveRef = useRef(handleSave);
+  useEffect(() => {
+    dirtyRef.current = isDraftDirty(draft, initialDraft);
+    saveRef.current = handleSave;
+  }, [draft, initialDraft, handleSave]);
+
+  useEffect(
+    () =>
+      register({
+        isDirty: () => dirtyRef.current,
+        save: () => saveRef.current(),
+      }),
+    [register],
+  );
 
   return (
     <div className="form-screen">
       <div className="form-header">
-        <button type="button" className="back-button" onClick={() => navigate('/liste')}>
+        <button type="button" className="back-button" onClick={() => attemptNavigate('/liste')}>
           <svg
             width="20"
             height="20"
@@ -120,7 +150,7 @@ function GameForm({ isNew, existing, dataCriteres }: FormProps) {
         <button
           type="button"
           className="primary-button"
-          onClick={() => void handleSave()}
+          onClick={() => void saveAndExit()}
           disabled={saving}
         >
           {saving ? 'Enregistrement…' : 'Enregistrer'}

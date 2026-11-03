@@ -28,11 +28,11 @@ L'identifiant (`id`) du jeu utilisé par l'API correspond au numéro de ligne r�
 
 ### `criteres`
 
-| Colonne           | Type   | Description                                                                |
-| ----------------- | ------ | -------------------------------------------------------------------------- |
-| En-tête (ligne 1) | string | Nom du critère (ex. `Format`, `Mécanique de jeu`, `Objectif pédagogique`…) |
-| Lignes 2..N       | string | Options disponibles pour ce critère (ex. `individuel`, `binôme`…)          |
-| `couleurs` (opt.) | string | Palette de couleurs indicative                                             |
+| Colonne           | Type   | Description                                                                                                  |
+| ----------------- | ------ | ------------------------------------------------------------------------------------------------------------ |
+| En-tête (ligne 1) | string | Nom du critère (ex. `Format`, `Mécanique de jeu`, `Objectif pédagogique`…)                                   |
+| Lignes 2..N       | string | Options disponibles pour ce critère (ex. `individuel`, `binôme`…)                                            |
+| `couleurs` (opt.) | string | Couleurs **hexadécimales** (`#RRGGBB` ou `#RGB`), une par cellule. Chaque jeu en reçoit une, de façon stable |
 
 ## Contrat d'API
 
@@ -45,6 +45,7 @@ Script) : le client doit lire le champ `ok`.
 {
   "ok": true,
   "updatedAt": "2026-10-29T12:00:00.000Z",
+  "couleurs": ["#4b6a4a", "#005b9f", "#00959f", "#8b73a3", "#f26d7d", "#ffc222", "#e25822"],
   "criteres": [
     {
       "id": "matiere",
@@ -68,6 +69,9 @@ Script) : le client doit lire le champ `ok`.
 }
 ```
 
+`couleurs` est la liste des valeurs hexadécimales valides de la colonne `couleurs` de l'onglet
+`criteres`. Si elle est absente ou vide, le client retombe sur la palette de `src/lib/colors.ts`.
+
 Cache serveur `CacheService` : 5 minutes.
 
 ### Écriture — `POST` (corps `text/plain`, JSON sérialisé)
@@ -87,7 +91,7 @@ Commun à toutes les actions :
 | -------------- | ------------------------------------ |
 | `createGame`   | `jeu: { nom, lien, criteres }`       |
 | `updateGame`   | `id`, `jeu: { nom, lien, criteres }` |
-| `createOption` | `critereId`, `libelle`, `couleur`    |
+| `createOption` | `critereId`, `libelle`               |
 
 `criteres` est un objet `{ "<critereId>": ["<optionId>", …] }`.
 
@@ -115,9 +119,9 @@ Réponses :
 6. `lien` : vide ou `https://`, ≤ 500 caractères.
 7. `criteres` : clés = ids connus ; valeurs = ids d'options appartenant au critère ; si
    `multiple = FALSE`, au plus une option.
-8. `libelle` (nouvelle option) : 1–40 caractères.
-9. `couleur` : clé de palette autorisée.
-10. `id`, `cree_le`, `maj_le` : **jamais** fournis par le client.
+8. `libelle` (nouvelle option) : 1–40 caractères. La couleur d'une option est attribuée par
+   le serveur, jamais choisie par le client.
+9. `id`, `cree_le`, `maj_le` : **jamais** fournis par le client.
 
 Le client valide aussi (UX), mais **la validation serveur fait foi**.
 

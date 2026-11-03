@@ -1,5 +1,5 @@
 import type { CriteresValues, Critere, Jeu, LudothequeData, Option } from '@/types';
-import { isColorKey } from '@/lib/colors';
+import { FALLBACK_COULEURS, isColorKey, isHexColor } from '@/lib/colors';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -60,6 +60,12 @@ function parseJeu(raw: unknown): Jeu | null {
   };
 }
 
+function parseCouleurs(raw: unknown): readonly string[] {
+  if (!Array.isArray(raw)) return FALLBACK_COULEURS;
+  const couleurs = raw.filter(isHexColor).map((value) => value.trim().toLowerCase());
+  return couleurs.length > 0 ? couleurs : FALLBACK_COULEURS;
+}
+
 /**
  * Valide la réponse de l'API. Toute entrée malformée est écartée, jamais rendue.
  */
@@ -73,6 +79,7 @@ export function parseData(raw: unknown): LudothequeData | null {
       .map(parseCritere)
       .filter((item): item is Critere => item !== null)
       .sort((a, b) => a.ordre - b.ordre),
+    couleurs: parseCouleurs(raw['couleurs']),
     updatedAt: asString(raw['updatedAt']) ?? '',
   };
 }

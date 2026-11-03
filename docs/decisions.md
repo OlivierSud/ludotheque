@@ -211,6 +211,61 @@ doit pas être implémentée.
   4. Animation dynamique au survol des cartes-livres : légère rotation accentuée (`rotate(...)`), agrandissement (`scale(1.03)`), élévation de 4px et ombre portée renforcée avec courbe de transition rebondissante (`cubic-bezier(0.34, 1.45, 0.64, 1)`).
 - **Conséquences** : harmonie typographique parfaite, suppression des artefacts visuels sur les volets, clarté accrue des critères de filtrage et retour tactile/ludique au survol des jeux.
 
+### D-025 — Couleur des cartes-livres tirée de la feuille
+
+- **Statut** : accepté (écart visuel validé)
+- **Date** : 2026-11-03
+- **Contexte** : la colonne `couleurs` de l'onglet `criteres` (colonne H) contient la palette
+  hexadécimale à utiliser, mais Apps Script l'ignorait et la couleur venait de la première option
+  du premier critère.
+- **Décision** :
+  1. Apps Script lit la colonne `couleurs` et renvoie `couleurs` dans `GET ?action=data`
+     (couleurs hexadécimales valides uniquement).
+  2. Chaque carte-livre reçoit une couleur tirée de cette liste, de façon pseudo-aléatoire mais
+     **stable** pour un même jeu (`hashString(id)`), comme la rotation de D-020.
+  3. Toute la carte est colorée ; le texte est blanc ou `#2b2b2b` selon le meilleur contraste
+     WCAG calculé sur le fond.
+  4. Sans colonne `couleurs` (ou liste vide), la palette de `src/lib/colors.ts` sert de secours.
+- **Alternatives** : garder le fond sombre + liseré coloré (refusé par l'utilisateur) ; couleur
+  tirée à chaque rendu (rejeté : clignotement visuel).
+- **Conséquences** : écart assumé par rapport à la maquette (D-020/D-024) ; chaque modification de
+  `Sheets.gs` exige un nouveau déploiement Apps Script.
+
+### D-026 — Pas de choix de couleur à l'ajout d'une option
+
+- **Statut** : accepté
+- **Date** : 2026-11-03
+- **Contexte** : le formulaire « Ajouter une option » proposait une liste de couleurs, alors que
+  les couleurs des cartes-livres viennent désormais de la feuille (D-025) et que le serveur
+  attribue déjà la couleur d'une option à la lecture.
+- **Décision** : le champ couleur est retiré du formulaire et du corps `createOption` ; le client
+  n'envoie plus que `critereId` et `libelle`. `createOption` renvoie l'identifiant créé.
+- **Alternatives** : garder un champ couleur (inutile, la valeur n'était même pas écrite dans la
+  feuille).
+- **Conséquences** : contrat d'écriture simplifié, aucun redéploiement Apps Script nécessaire
+  (`handleCreateOption` ignorait déjà `couleur`).
+
+### D-027 — Confirmation avant de quitter un formulaire modifié
+
+- **Statut** : accepté (écart de maquette validé)
+- **Date** : 2026-11-03
+- **Contexte** : cliquer sur « Retour », un onglet ou les Réglages quittait le formulaire et
+  perdait silencieusement la saisie en cours.
+- **Décision** :
+  1. Le formulaire jeu signale au contexte `UnsavedChangesProvider` s'il est modifié
+     (`isDraftDirty`, comparaison nom / lien / sélections, ordre des sélections ignoré).
+  2. Toute navigation interne passe par `attemptNavigate` : si le brouillon est modifié, une
+     modale propose « Enregistrer » ou « Sortir sans enregistrer ». Fermer la modale (×, clic
+     hors carte, Échap) annule la sortie.
+  3. « Enregistrer » exécute l'enregistrement habituel puis navigue ; en cas d'échec
+     (validation, captcha), la modale se ferme et on reste sur le formulaire avec le message.
+  4. Un `beforeunload` natif protège aussi le rechargement et la fermeture de l'onglet.
+- **Alternatives** : `useBlocker` de React Router (impose un data router, donc de refondre le
+  routage à volets) ; navigation non interceptée + sauvegarde automatique (non demandée).
+- **Conséquences** : le bouton « Retour », les onglets desktop/mobile et l'icône Réglages
+  passent par le garde. Le bouton « précédent » du navigateur entre deux routes internes n'est
+  pas intercepté (limite du `HashRouter` déclaratif).
+
 ## Questions ouvertes
 
 | #   | Question                                                           | Impact                   | Bloquant         |

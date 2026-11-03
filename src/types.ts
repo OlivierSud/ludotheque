@@ -29,6 +29,8 @@ export interface Jeu {
 export interface LudothequeData {
   readonly jeux: readonly Jeu[];
   readonly criteres: readonly Critere[];
+  /** Palette hexadécimale lue dans la colonne `couleurs` de l'onglet `criteres`. */
+  readonly couleurs: readonly string[];
   readonly updatedAt: string;
 }
 

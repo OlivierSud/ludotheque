@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Jeu } from '@/types';
-import { filterGames, gameColor } from '@/lib/filterGames';
+import { filterGames } from '@/lib/filterGames';
 import { useData } from '@/context/DataContext';
 import { useFilters } from '@/context/FiltersContext';
 import { Filters } from '@/components/Filters';
@@ -143,7 +143,7 @@ export function HomePage() {
                 <GameCard
                   key={jeu.id}
                   jeu={jeu}
-                  couleur={gameColor(jeu, data.criteres)}
+                  palette={data.couleurs}
                   index={index}
                   onOpen={openGame}
                   onEdit={(j) => navigate(`/jeu/${j.id}`)}

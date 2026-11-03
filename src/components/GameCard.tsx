@@ -1,26 +1,34 @@
-import type { ColorKey, Jeu } from '@/types';
-import { colorHex } from '@/lib/colors';
+import type React from 'react';
+import type { Jeu } from '@/types';
+import { pickGameVisual } from '@/lib/colors';
 import { getBookStyle } from '@/lib/bookStyle';
 
 interface GameCardProps {
   readonly jeu: Jeu;
-  readonly couleur: ColorKey;
+  /** Palette hexadécimale issue de la feuille (`couleurs`). */
+  readonly palette: readonly string[];
   readonly index?: number;
   readonly onOpen: (jeu: Jeu) => void;
   readonly onEdit?: (jeu: Jeu) => void;
 }
 
-export function GameCard({ jeu, couleur, index = 0, onOpen, onEdit }: GameCardProps) {
+export function GameCard({ jeu, palette, index = 0, onOpen, onEdit }: GameCardProps) {
   const { style } = getBookStyle(jeu.id, index);
+  const visual = pickGameVisual(jeu.id, palette);
 
   return (
     <div
       className="game-card"
-      style={{
-        ...style,
-        transform: undefined,
-        borderLeftColor: colorHex(couleur),
-      }}
+      style={
+        {
+          ...style,
+          transform: undefined,
+          '--game-bg': visual.background,
+          '--game-fg': visual.foreground,
+          '--game-spine': visual.spine,
+          '--game-fg-soft': visual.foregroundSoft,
+        } as React.CSSProperties
+      }
     >
       <button
         type="button"

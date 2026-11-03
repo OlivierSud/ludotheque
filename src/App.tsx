@@ -1,6 +1,7 @@
-import { HashRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { HashRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { DataProvider } from '@/context/DataContext';
 import { FiltersProvider } from '@/context/FiltersContext';
+import { UnsavedChangesProvider, useUnsavedChanges } from '@/context/UnsavedChangesContext';
 import { MobileTabBar } from '@/components/MobileTabBar';
 import { HomePage } from '@/pages/HomePage';
 import { FiltersPage } from '@/pages/FiltersPage';
@@ -14,7 +15,7 @@ const OVERLAY_PATHS = ['/reglages', '/mentions-legales', '/confidentialite'];
 
 function Shell() {
   const location = useLocation();
-  const navigate = useNavigate();
+  const { attemptNavigate } = useUnsavedChanges();
   const isPanel = PANEL_PATHS.some(
     (path) => location.pathname === path || location.pathname.startsWith(`${path}/`),
   );
@@ -34,7 +35,7 @@ function Shell() {
           <button
             type="button"
             className="icon-button"
-            onClick={() => navigate('/reglages')}
+            onClick={() => attemptNavigate('/reglages')}
             aria-label="Ouvrir les réglages"
             title="Réglages"
           >
@@ -69,7 +70,7 @@ function Shell() {
               <button
                 type="button"
                 className={`tab tab--filters ${!isPanel ? 'tab--active' : 'tab--inactive'}`}
-                onClick={() => navigate('/')}
+                onClick={() => attemptNavigate('/')}
                 aria-label="Afficher les filtres"
                 aria-selected={!isPanel}
                 role="tab"
@@ -80,7 +81,7 @@ function Shell() {
               <button
                 type="button"
                 className={`tab tab--list ${isPanel ? 'tab--active' : 'tab--inactive'}`}
-                onClick={() => navigate('/liste')}
+                onClick={() => attemptNavigate('/liste')}
                 aria-label="Afficher la liste des jeux"
                 aria-selected={isPanel}
                 role="tab"
@@ -121,7 +122,9 @@ export function App() {
     <DataProvider>
       <FiltersProvider>
         <HashRouter>
-          <Shell />
+          <UnsavedChangesProvider>
+            <Shell />
+          </UnsavedChangesProvider>
         </HashRouter>
       </FiltersProvider>
     </DataProvider>

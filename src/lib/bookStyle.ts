@@ -1,4 +1,5 @@
 import type React from 'react';
+import { hashString } from '@/lib/stableHash';
 
 export interface BookStyleResult {
   readonly transform: string;
@@ -10,12 +11,7 @@ export interface BookStyleResult {
  * basés sur l'identifiant pour afficher une pile de livres naturelle et stable.
  */
 export function getBookStyle(id: string, index: number = 0): BookStyleResult {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = (hash << 5) - hash + id.charCodeAt(i);
-    hash |= 0;
-  }
-  const absHash = Math.abs(hash) + index * 7;
+  const absHash = hashString(id) + index * 7;
 
   // Rotation subtile entre -1.2° et +1.2°
   const rotVal = Number((((absHash % 25) - 12) * 0.1).toFixed(2));

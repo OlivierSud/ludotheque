@@ -52,6 +52,7 @@ Toute demande hors périmètre suit le protocole « demander avant » (`AGENTS.m
 | FR-9  | Rester utilisable hors ligne (lecture du dernier état chargé)         | Should   |
 | FR-10 | Signaler les erreurs réseau et permettre de réessayer                 | Must     |
 | FR-11 | Afficher la version de l'application dans les Réglages                | Should   |
+| FR-12 | Prévenir avant de quitter un formulaire modifié                       | Must     |
 
 ## Exigences non fonctionnelles
 
@@ -92,6 +93,12 @@ Scénario: ajouter un jeu valide
   Quand j'envoie le formulaire
   Alors une ligne est ajoutée dans la feuille "Jeux"
   Et le jeu apparaît dans la liste sans rechargement manuel
+
+Scénario: quitter un formulaire modifié
+  Étant donné un jeu en cours d'édition avec des modifications non enregistrées
+  Quand je clique sur « Retour », un onglet ou les Réglages
+  Alors une boîte de dialogue propose « Enregistrer » ou « Sortir sans enregistrer »
+  Et cliquer à côté, sur « × » ou appuyer sur Échap annule la sortie
 
 Scénario: jeton Turnstile absent
   Étant donné un formulaire valide sans jeton

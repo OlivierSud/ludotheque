@@ -115,7 +115,7 @@ Typographie : Helvetica Neue (système) ; pas de webfont payante.
 
 - En-tête permanent : titre « La Ludothèque » + sous-titre « Le répertoire des jeux pédagogiques » + bouton réglages, toujours visible au sommet de la carte (décision D-021).
 - Section **Filtres** : affichage compact limité au premier quart de l'écran (`max-height: 25%`, décision D-022) avec lignes épurées par critère, pastilles réduites et bouton de réinitialisation rapide pour maximiser la hauteur consacrée aux résultats de jeux.
-- Section **Résultats** : affichage en empilement de livres (`.book-stack`, décision D-020) avec bordure gauche colorée, losange `◆`, bouton `i`, et légère rotation/décalage aléatoires déterministes.
+- Section **Résultats** : affichage en empilement de livres (`.book-stack`, décision D-020) avec losange `◆`, bouton `i`, et légère rotation/décalage aléatoires déterministes. La carte entière prend une couleur hexadécimale tirée de la colonne `couleurs` de la feuille (D-025), avec texte blanc ou sombre selon le contraste.
 - Système de volets coulissants (décision D-021) : rail coulissant en dessous du titre. En vue Filtres, la double colonne d'onglets (jaune « Filtres » et bleu « Liste des jeux ») est calée à droite ; en vue Liste des jeux, elle est calée à gauche. L'onglet actif est fortement accentué.
   - Sous-vue **Base de données** : même style unifié en pile de livres que les résultats (décision D-020).
   - Sous-vue **Édition du jeu** : retour, nom (lecture seule dans la maquette), lien, critères
@@ -132,6 +132,10 @@ Barre d'onglets basse « Jeux / Filtres / Liste ». Les onglets verticaux sont m
 - Bouton « Enregistrer » dans l'en-tête du formulaire et « Nouveau jeu » dans la liste
   (D-017), absents de la maquette.
 - Les critères et options sont dynamiques (D-014) : la maquette en montre 3 à titre d'exemple.
+- Les cartes-livres sont entièrement colorées par une couleur issue de la feuille, avec texte à
+  contraste automatique (D-025), au lieu du fond sombre + liseré gauche coloré de la maquette.
+- Boîte de dialogue « Modifications non enregistrées » à la sortie d'un formulaire modifié
+  (D-027), absente de la maquette mais nécessaire pour éviter une perte de saisie.
 
 ### À confirmer avec l'utilisateur
 

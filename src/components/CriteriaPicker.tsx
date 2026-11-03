@@ -1,13 +1,12 @@
 import { useState } from 'react';
-import type { ColorKey, Critere, Option } from '@/types';
-import { PALETTE } from '@/types';
+import type { Critere } from '@/types';
 import { colorHex } from '@/lib/colors';
 
 interface CriteriaPickerProps {
   readonly critere: Critere;
   readonly selected: readonly string[];
   readonly onChange: (ids: readonly string[]) => void;
-  readonly onCreateOption: (libelle: string, couleur: ColorKey) => Promise<Option | null>;
+  readonly onCreateOption: (libelle: string) => Promise<string | null>;
   readonly canWrite: boolean;
 }
 
@@ -20,7 +19,6 @@ export function CriteriaPicker({
 }: CriteriaPickerProps) {
   const [adding, setAdding] = useState(false);
   const [libelle, setLibelle] = useState('');
-  const [couleur, setCouleur] = useState<ColorKey>('teal');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,9 +43,9 @@ export function CriteriaPicker({
     setBusy(true);
     setError(null);
     try {
-      const created = await onCreateOption(value, couleur);
-      if (created !== null) {
-        onChange(critere.multiple ? [...selected, created.id] : [created.id]);
+      const createdId = await onCreateOption(value);
+      if (createdId !== null) {
+        onChange(critere.multiple ? [...selected, createdId] : [createdId]);
         setLibelle('');
         setAdding(false);
       }
@@ -103,18 +101,6 @@ export function CriteriaPicker({
             aria-label="Libellé de la nouvelle option"
             onChange={(event) => setLibelle(event.target.value)}
           />
-          <select
-            className="picker__add-color"
-            value={couleur}
-            aria-label="Couleur de la nouvelle option"
-            onChange={(event) => setCouleur(event.target.value as ColorKey)}
-          >
-            {PALETTE.map((key) => (
-              <option key={key} value={key}>
-                {key}
-              </option>
-            ))}
-          </select>
           <button type="submit" className="picker__add-submit" disabled={busy}>
             {busy ? '…' : 'Ajouter'}
           </button>

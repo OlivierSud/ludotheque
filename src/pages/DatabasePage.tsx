@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom';
 import type { Jeu } from '@/types';
-import { gameColor } from '@/lib/filterGames';
 import { useData } from '@/context/DataContext';
 import { GameCard } from '@/components/GameCard';
 
@@ -32,7 +31,7 @@ export function DatabasePage() {
             <GameCard
               key={jeu.id}
               jeu={jeu}
-              couleur={gameColor(jeu, data.criteres)}
+              palette={data.couleurs}
               index={index}
               onOpen={() => navigate(`/jeu/${jeu.id}`)}
               onEdit={() => navigate(`/jeu/${jeu.id}`)}
