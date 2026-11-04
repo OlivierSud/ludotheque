@@ -89,8 +89,8 @@ Fournir un `.env.example` sans valeur réelle.
 5. Copier l'URL `/exec`.
 6. Après chaque modification : `Gérer les déploiements → Modifier → Nouvelle version`.
 
-> L'URL `/exec` est publique par nature. La protection repose sur Turnstile, la validation et le
-> rate limit — pas sur le secret de l'URL.
+> L'URL `/exec` est publique par nature. La protection repose sur Turnstile et la validation — pas
+> sur le secret de l'URL. Aucun quota ne bloque l'écriture (D-030).
 
 ## Cloudflare Turnstile
 
@@ -114,18 +114,18 @@ Fournir un `.env.example` sans valeur réelle.
 
 ## Dépannage
 
-| Symptôme                                            | Cause probable                               | Solution                                         |
-| --------------------------------------------------- | -------------------------------------------- | ------------------------------------------------ |
-| Page blanche, 404 sur `/assets/*`                   | `base` incorrect                             | Vérifier `VITE_BASE_PATH` et le nom du dépôt     |
-| Ancienne version affichée                           | Service worker en cache                      | Attendre, ou DevTools → Unregister + hard reload |
-| `configure-pages` échoue                            | Pages non activé en « GitHub Actions »       | Settings → Pages → Source                        |
-| `npm ci` échoue en CI                               | Lockfile absent/désynchronisé                | `npm install` en local + commit                  |
-| Erreur CORS sur POST                                | Preflight `OPTIONS` non géré par Apps Script | POST en `text/plain`, ou Worker proxy            |
-| « Captcha non configuré » et Enregistrer sans effet | `VITE_TURNSTILE_SITE_KEY` absente du build   | Renseigner la variable GitHub puis redéployer    |
-| `{ ok:false, error:"captcha" }`                     | Site key/secret erronés, domaine absent      | Vérifier les deux clés et les domaines Turnstile |
-| `{ ok:false, error:"rate_limited" }`                | Plus de 5 ajouts/heure                       | Attendre, ou ajuster le seuil (avec validation)  |
-| Données absentes                                    | `statut != publie` ou cache 5 min            | Vérifier la colonne `statut`, vider le cache     |
-| Quota Apps Script dépassé                           | Trop d'appels `UrlFetch`/jour                | Réduire les appels, augmenter le cache           |
+| Symptôme                                            | Cause probable                                 | Solution                                         |
+| --------------------------------------------------- | ---------------------------------------------- | ------------------------------------------------ |
+| Page blanche, 404 sur `/assets/*`                   | `base` incorrect                               | Vérifier `VITE_BASE_PATH` et le nom du dépôt     |
+| Ancienne version affichée                           | Service worker en cache                        | Attendre, ou DevTools → Unregister + hard reload |
+| `configure-pages` échoue                            | Pages non activé en « GitHub Actions »         | Settings → Pages → Source                        |
+| `npm ci` échoue en CI                               | Lockfile absent/désynchronisé                  | `npm install` en local + commit                  |
+| Erreur CORS sur POST                                | Preflight `OPTIONS` non géré par Apps Script   | POST en `text/plain`, ou Worker proxy            |
+| « Captcha non configuré » et Enregistrer sans effet | `VITE_TURNSTILE_SITE_KEY` absente du build     | Renseigner la variable GitHub puis redéployer    |
+| `{ ok:false, error:"captcha" }`                     | Site key/secret erronés, domaine absent        | Vérifier les deux clés et les domaines Turnstile |
+| `{ ok:false, error:"rate_limited" }`                | Ancien déploiement Apps Script encore en place | Repasser `Turnstile.gs` + `Sheets.gs` (D-030)    |
+| Données absentes                                    | `statut != publie` ou cache 5 min              | Vérifier la colonne `statut`, vider le cache     |
+| Quota Apps Script dépassé                           | Trop d'appels `UrlFetch`/jour                  | Réduire les appels, augmenter le cache           |
 
 ## Checklist de mise en production
 

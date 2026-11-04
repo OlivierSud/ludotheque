@@ -113,7 +113,8 @@ components → lib → types
 
 1. L'utilisateur remplit le formulaire ; le widget Turnstile produit un jeton.
 2. `POST <API_URL>` avec `{ action: 'create', token, game, honeypot, startedAt }`.
-3. Apps Script : vérifie Turnstile → valide les champs → applique le rate limit → ajoute la ligne.
+3. Apps Script : vérifie Turnstile → valide les champs → ajoute la ligne. Aucun quota ne bloque
+   l'écriture (D-030).
 4. Réponse `{ ok: true, id }` ; l'application rafraîchit la liste (ou insère le jeu en local).
 
 Détails : [`data-google-sheet.md`](./data-google-sheet.md) et [`security.md`](./security.md).
@@ -137,14 +138,14 @@ Secrets (jamais dans le dépôt) :
 
 ## Décisions techniques
 
-| Sujet     | Choix                               | Raison                                        |
-| --------- | ----------------------------------- | --------------------------------------------- |
-| Données   | Google Sheets                       | Demandé, gratuit, éditable manuellement       |
-| Backend   | Apps Script Web App                 | Gratuit, pas de serveur, garde le secret      |
-| Auth      | Aucune                              | Exigence produit                              |
-| Anti-abus | Turnstile + validation + rate limit | Aucune authentification ⇒ protéger l'écriture |
-| PWA       | Installation via Réglages           | Exigence produit (pas de bannière intrusive)  |
-| Routage   | HashRouter (react-router)           | Aucune configuration serveur (D-011)          |
+| Sujet     | Choix                             | Raison                                        |
+| --------- | --------------------------------- | --------------------------------------------- |
+| Données   | Google Sheets                     | Demandé, gratuit, éditable manuellement       |
+| Backend   | Apps Script Web App               | Gratuit, pas de serveur, garde le secret      |
+| Auth      | Aucune                            | Exigence produit                              |
+| Anti-abus | Turnstile + validation + honeypot | Aucune authentification ⇒ protéger l'écriture |
+| PWA       | Installation via Réglages         | Exigence produit (pas de bannière intrusive)  |
+| Routage   | HashRouter (react-router)         | Aucune configuration serveur (D-011)          |
 
 ## Contraintes à surveiller
 

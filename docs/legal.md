@@ -39,12 +39,11 @@ Aucune collecte de données ne doit exister sans être décrite ici.
 
 ### Données collectées
 
-| Donnée                               | Finalité                                          | Base légale                  | Conservation                         |
-| ------------------------------------ | ------------------------------------------------- | ---------------------------- | ------------------------------------ |
-| Contenu ajouté (titre, description…) | Afficher la ludothèque                            | Consentement (envoi)         | Jusqu'à suppression                  |
-| Jeton Turnstile                      | Vérifier que l'envoi vient d'un humain            | Intérêt légitime (anti-spam) | Détruit après vérification (≤ 5 min) |
-| Adresse IP                           | Rate limiting (jamais stockée, hashée en mémoire) | Intérêt légitime             | ≤ 1 h, non persistée                 |
-| Préférences locales (`localStorage`) | Confort d'utilisation (thème, filtres)            | Intérêt légitime             | Jusqu'au vidage du navigateur        |
+| Donnée                               | Finalité                               | Base légale                  | Conservation                         |
+| ------------------------------------ | -------------------------------------- | ---------------------------- | ------------------------------------ |
+| Contenu ajouté (titre, description…) | Afficher la ludothèque                 | Consentement (envoi)         | Jusqu'à suppression                  |
+| Jeton Turnstile                      | Vérifier que l'envoi vient d'un humain | Intérêt légitime (anti-spam) | Détruit après vérification (≤ 5 min) |
+| Préférences locales (`localStorage`) | Confort d'utilisation (thème, filtres) | Intérêt légitime             | Jusqu'au vidage du navigateur        |
 
 **Aucun compte, aucun e-mail, aucun cookie publicitaire, aucun traceur analytique.**
 

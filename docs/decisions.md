@@ -86,7 +86,7 @@ doit pas être implémentée.
   modération.
 - **Alternatives** : `en_attente` + validation manuelle (plus sûr, plus de travail) ; publication
   - bouton de signalement (fonctionnalité supplémentaire).
-- **Conséquences** : Turnstile, honeypot, validation et rate limit sont la seule barrière. Le
+- **Conséquences** : Turnstile, honeypot, validation et délai minimal sont la seule barrière. Le
   propriétaire supprime manuellement une ligne indésirable. Pas d'écran d'administration en v1.
 
 ### D-010 — Pas d'écran d'administration en v1
@@ -139,9 +139,8 @@ doit pas être implémentée.
 - **Date** : 2026-10-29
 - **Décision** : tout visiteur peut ajouter et modifier un jeu ainsi qu'ajouter des options. Pas
   d'écran d'administration.
-- **Conséquences** : Turnstile, honeypot, validation et rate limit (20 écritures/h/IP) sont la
-  seule barrière. Le propriétaire supprime manuellement une ligne indésirable. Risque de
-  vandalisme à surveiller.
+- **Conséquences** : Turnstile, honeypot, validation et délai minimal sont la seule barrière. Le
+  propriétaire supprime manuellement une ligne indésirable. Risque de vandalisme à surveiller.
 
 ### D-016 — Navigation mobile par barre d'onglets
 
@@ -279,6 +278,26 @@ doit pas être implémentée.
   développeur (inaccessibles au public).
 - **Conséquences** : action de maintenance sans perte de données métier (Google Sheets) ; un
   rechargement est nécessaire pour réactiver le service worker et le cache hors ligne.
+
+### D-030 — Aucun quota ne bloque l'écriture
+
+- **Statut** : accepté
+- **Date** : 2026-11-04
+- **Contexte** : le rate limit (20 écritures/h, clé `getClientKey`) reposait sur
+  `X-Forwarded-For`, absent des en-têtes fournis par Apps Script. La clé valait donc `'unknown'`
+  pour tous les visiteurs : le quota était **global**, et une vingtaine d'écritures suffisait à
+  bloquer l'enregistrement pour tout le monde pendant une heure. Vérifié en production
+  (« Trop de requêtes. Réessayez dans une heure. »).
+- **Décision** : supprimer le rate limit des écritures (`checkRateLimit`, `getClientKey`,
+  `clientKey`, l'erreur `rate_limited` et le hash d'IP). Un utilisateur légitime doit toujours
+  pouvoir enregistrer ; Turnstile (jeton à usage unique vérifié côté serveur), le honeypot, le
+  délai minimal de 2 s et la validation restent les barrières anti-abus.
+- **Alternatives** : clé par client réelle (impossible : Apps Script n'expose pas l'IP) ; quota
+  par jeton Turnstile (jeton à usage unique) ; limite haute non bloquante (aucun intérêt).
+- **Conséquences** : plus de faux refus ; un robot capable de résoudre Turnstile peut écrire sans
+  limite → surveillance manuelle de la feuille et modération (D-009). Le client reconnaît encore
+  `rate_limited` pour tolérer un serveur pas encore mis à jour. Aucune IP n'est plus traitée :
+  la ligne correspondante des mentions légales est retirée.
 
 ## Questions ouvertes
 

@@ -1,6 +1,6 @@
 // backend/apps-script/Turnstile.gs
 
-function verifyTurnstile(token, clientKey) {
+function verifyTurnstile(token) {
   const secret = PropertiesService.getScriptProperties().getProperty('TURNSTILE_SECRET');
   if (typeof token !== 'string' || token.length === 0 || !secret) return false;
 
@@ -9,7 +9,7 @@ function verifyTurnstile(token, clientKey) {
       'https://challenges.cloudflare.com/turnstile/v0/siteverify',
       {
         method: 'post',
-        payload: { secret: secret, response: token, remoteip: clientKey },
+        payload: { secret: secret, response: token },
         muteHttpExceptions: true,
       },
     );
@@ -21,28 +21,9 @@ function verifyTurnstile(token, clientKey) {
   }
 }
 
-function getClientKey(e) {
-  const headers = (e && e.headers) || {};
-  const forwarded = headers['X-Forwarded-For'] || headers['x-forwarded-for'] || '';
-  const ip = String(forwarded).split(',')[0].trim() || 'unknown';
-  const digest = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, ip);
-  return digest
-    .map(function (byte) {
-      return (byte < 0 ? byte + 256 : byte).toString(16).padStart(2, '0');
-    })
-    .join('');
-}
-
-function checkRateLimit(clientKey) {
-  const cache = CacheService.getScriptCache();
-  const key = 'rl:' + clientKey;
-  const raw = cache.get(key);
-  const count = raw ? parseInt(raw, 10) : 0;
-  if (count >= 20) return false;
-  cache.put(key, String(count + 1), 3600);
-  return true;
-}
-
+// L'écriture n'est jamais bloquée par un quota (D-030) : un utilisateur légitime doit toujours
+// pouvoir enregistrer. La protection repose sur Turnstile, le honeypot, le délai minimal et la
+// validation serveur.
 function checkTiming(startedAt) {
   if (typeof startedAt !== 'number') return false;
   const elapsed = Date.now() - startedAt;

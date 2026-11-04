@@ -32,12 +32,11 @@ function doPost(e) {
   // Champ piège : si rempli, on fait comme si tout allait bien (silencieux).
   if (body.website) return jsonResponse({ ok: true, id: '' });
 
-  const clientKey = getClientKey(e);
   const action = body.action;
 
-  if (action === 'createGame') return handleCreateGame(body, clientKey);
-  if (action === 'updateGame') return handleUpdateGame(body, clientKey);
-  if (action === 'createOption') return handleCreateOption(body, clientKey);
+  if (action === 'createGame') return handleCreateGame(body);
+  if (action === 'updateGame') return handleUpdateGame(body);
+  if (action === 'createOption') return handleCreateOption(body);
 
   return jsonResponse({ ok: false, error: 'validation' });
 }

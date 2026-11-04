@@ -71,7 +71,7 @@ Séquence de travail. Pas de dates : chaque phase démarre quand la précédente
 - [ ] Configurer Turnstile (site + secret) et les domaines
 - [ ] Déployer le Web App et renseigner `VITE_API_URL`
 - [ ] Vérifier CORS depuis le navigateur (POST `text/plain`)
-- [ ] Tester : liste vide, ajout valide, jeton invalide, payload invalide, rate limit
+- [ ] Tester : liste vide, ajout valide, jeton invalide, payload invalide
 - [ ] Documenter le déploiement effectivement réalisé
 
 **Sortie** : `GET ?action=list` et un `POST` valide fonctionnent depuis `localhost` et depuis
@@ -108,7 +108,7 @@ GitHub Pages.
 - [ ] Validation client (messages, champs obligatoires)
 - [ ] Intégration Turnstile (widget + gestion d'erreur)
 - [ ] Honeypot + délai minimal
-- [ ] Appel `POST`, gestion des erreurs (`captcha`, `validation`, `rate_limited`)
+- [ ] Appel `POST`, gestion des erreurs (`captcha`, `validation`, `not_found`, `server`)
 - [ ] Confirmation visuelle et rafraîchissement de la liste
 - [ ] Tests du service et du formulaire
 

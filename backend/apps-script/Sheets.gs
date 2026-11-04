@@ -190,7 +190,7 @@ function readAll() {
   return { criteres: criteres, jeux: jeux, couleurs: couleurs };
 }
 
-function handleCreateGame(body, clientKey) {
+function handleCreateGame(body) {
   const ss = SpreadsheetApp.openById(SHEET_ID);
   const jeuSheet = getGamesSheet(ss);
   const critSheet = getCriteriaSheet(ss);
@@ -203,11 +203,8 @@ function handleCreateGame(body, clientKey) {
   if (!validation.ok) {
     return jsonResponse({ ok: false, error: 'validation', fields: validation.fields });
   }
-  if (!verifyTurnstile(body.token, clientKey)) {
+  if (!verifyTurnstile(body.token)) {
     return jsonResponse({ ok: false, error: 'captcha' });
-  }
-  if (!checkRateLimit(clientKey)) {
-    return jsonResponse({ ok: false, error: 'rate_limited' });
   }
   if (!checkTiming(body.startedAt)) {
     return jsonResponse({ ok: false, error: 'validation' });
@@ -243,7 +240,7 @@ function handleCreateGame(body, clientKey) {
   return jsonResponse({ ok: true, id: newRowId });
 }
 
-function handleUpdateGame(body, clientKey) {
+function handleUpdateGame(body) {
   const ss = SpreadsheetApp.openById(SHEET_ID);
   const jeuSheet = getGamesSheet(ss);
   const critSheet = getCriteriaSheet(ss);
@@ -261,11 +258,8 @@ function handleUpdateGame(body, clientKey) {
   if (!validation.ok) {
     return jsonResponse({ ok: false, error: 'validation', fields: validation.fields });
   }
-  if (!verifyTurnstile(body.token, clientKey)) {
+  if (!verifyTurnstile(body.token)) {
     return jsonResponse({ ok: false, error: 'captcha' });
-  }
-  if (!checkRateLimit(clientKey)) {
-    return jsonResponse({ ok: false, error: 'rate_limited' });
   }
   if (!checkTiming(body.startedAt)) {
     return jsonResponse({ ok: false, error: 'validation' });
@@ -301,7 +295,7 @@ function handleUpdateGame(body, clientKey) {
   return jsonResponse({ ok: true, id: body.id });
 }
 
-function handleCreateOption(body, clientKey) {
+function handleCreateOption(body) {
   const critereId = String(body.critereId == null ? '' : body.critereId).trim();
   const libelle = String(body.libelle == null ? '' : body.libelle).trim();
 
@@ -326,11 +320,8 @@ function handleCreateOption(body, clientKey) {
   if (Object.keys(fields).length > 0) {
     return jsonResponse({ ok: false, error: 'validation', fields: fields });
   }
-  if (!verifyTurnstile(body.token, clientKey)) {
+  if (!verifyTurnstile(body.token)) {
     return jsonResponse({ ok: false, error: 'captcha' });
-  }
-  if (!checkRateLimit(clientKey)) {
-    return jsonResponse({ ok: false, error: 'rate_limited' });
   }
   if (!checkTiming(body.startedAt)) {
     return jsonResponse({ ok: false, error: 'validation' });

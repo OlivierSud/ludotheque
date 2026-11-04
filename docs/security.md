@@ -5,14 +5,14 @@
 L'application **n'a pas d'authentification** : n'importe qui peut lire et proposer un jeu. Les
 risques principaux sont donc :
 
-| Risque                           | Contre-mesure                                      |
-| -------------------------------- | -------------------------------------------------- |
-| Spam / bot remplissant la sheet  | Cloudflare Turnstile + honeypot + délai minimal    |
-| Flood (déni de quota)            | Rate limit par IP hashée + cache de lecture        |
-| Injection de contenu (HTML/JS)   | Validation stricte, rendu texte uniquement (React) |
-| Fuite de secret                  | Secret uniquement dans les Script Properties       |
-| Vandalisme / contenu inapproprié | Suppression manuelle dans la feuille (D-009)       |
-| Fuite de données personnelles    | Collecte minimale, pas d'IP stockée, pas de compte |
+| Risque                           | Contre-mesure                                                   |
+| -------------------------------- | --------------------------------------------------------------- |
+| Spam / bot remplissant la sheet  | Cloudflare Turnstile + honeypot + délai minimal                 |
+| Flood (déni de quota)            | Turnstile + surveillance manuelle (aucun quota bloquant, D-030) |
+| Injection de contenu (HTML/JS)   | Validation stricte, rendu texte uniquement (React)              |
+| Fuite de secret                  | Secret uniquement dans les Script Properties                    |
+| Vandalisme / contenu inapproprié | Suppression manuelle dans la feuille (D-009)                    |
+| Fuite de données personnelles    | Collecte minimale, pas d'IP stockée, pas de compte              |
 
 ## Cloudflare Turnstile
 
@@ -46,14 +46,13 @@ POST (jeu + jeton) ─────────────────▶ Apps S
 ### Vérification côté serveur
 
 ```js
-// Apps Script — turnstile.gs
-function verifyTurnstile(token, remoteIp) {
+// Apps Script — Turnstile.gs
+function verifyTurnstile(token) {
   const res = UrlFetchApp.fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
     method: 'post',
     payload: {
       secret: PropertiesService.getScriptProperties().getProperty('TURNSTILE_SECRET'),
       response: token,
-      remoteip: remoteIp,
     },
     muteHttpExceptions: true,
   });
@@ -72,8 +71,10 @@ Règles :
 ## Édition publique (D-015)
 
 - Toute écriture (ajout, modification, ajout d'option) exige un jeton Turnstile valide.
-- Rate limit : 20 écritures/heure/IP (best-effort : Apps Script n'expose pas toujours l'IP du
-  visiteur ; le compteur peut alors être global).
+- **Aucun quota ne bloque l'écriture** (D-030) : le rate limit a été retiré parce qu'Apps Script
+  n'expose pas l'IP du visiteur, ce qui rendait le compteur global. Un utilisateur légitime doit
+  toujours pouvoir enregistrer ; la protection repose sur Turnstile, le honeypot, le délai minimal
+  et la validation.
 - Aucune suppression depuis l'interface : modération manuelle dans la feuille.
 - Le propriétaire doit surveiller la feuille et supprimer les lignes indésirables.
 
@@ -131,7 +132,7 @@ et l'URL Apps Script (`connect-src`).
 - [ ] Secret uniquement dans les Script Properties
 - [ ] Validation serveur testée avec des payloads invalides
 - [ ] Honeypot et délai minimal testés
-- [ ] Rate limit testé (6e requête refusée)
+- [ ] Aucun quota ne bloque l'écriture (D-030), vérifié par un enregistrement de bout en bout
 - [ ] Aucun `console.log` de données sensibles
 - [ ] Mentions légales et confidentialité publiées
 - [ ] Procédure de suppression d'une ligne documentée

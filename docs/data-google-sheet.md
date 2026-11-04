@@ -102,7 +102,6 @@ Réponses :
 | Succès             | `{ "ok": true, "id": "…" }`                               |
 | Turnstile invalide | `{ "ok": false, "error": "captcha" }`                     |
 | Données invalides  | `{ "ok": false, "error": "validation", "fields": { … } }` |
-| Trop de requêtes   | `{ "ok": false, "error": "rate_limited" }`                |
 | Introuvable        | `{ "ok": false, "error": "not_found" }`                   |
 | Erreur serveur     | `{ "ok": false, "error": "server" }`                      |
 
@@ -134,11 +133,13 @@ Le client valide aussi (UX), mais **la validation serveur fait foi**.
 
 Toute écriture invalide ne modifie **rien**.
 
-## Rate limiting
+## Aucun quota d'écriture (D-030)
 
-- Clé : hash SHA-256 de l'IP (jamais l'IP en clair, jamais persistée).
-- `CacheService`, TTL 1 h : **20 écritures / heure / IP**.
-- Lecture : cache 5 min.
+- Pas de rate limit : un utilisateur légitime doit toujours pouvoir enregistrer.
+- Apps Script n'expose pas l'IP du visiteur ; un compteur aurait donc été global et aurait bloqué
+  tout le monde après une vingtaine d'écritures.
+- Barrières restantes : Turnstile (jeton à usage unique, vérifié côté serveur), honeypot, délai
+  minimal de 2 s, validation serveur, surveillance manuelle de la feuille.
 
 ## Palette autorisée
 
