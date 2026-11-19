@@ -494,6 +494,7 @@ select:focus-visible {
     border-color 0.18s ease,
     background-color 0.18s ease;
   user-select: none;
+  cursor: pointer;
 }
 
 .game-card:hover {

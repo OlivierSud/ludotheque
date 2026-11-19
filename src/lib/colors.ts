@@ -34,8 +34,23 @@ export function colorText(key: ColorKey): string {
   return COLOR_TEXT[key];
 }
 
+/**
+ * Palette de 8 couleurs vives pour les cartes de jeux :
+ * Sun Yellow, Electric Cyan, Hot Pink, Royal Blue, Lime Green, Orange, Red, Violet.
+ */
+export const GAME_PALETTE: readonly string[] = [
+  '#ffd600', // Sun Yellow
+  '#00d4ff', // Electric Cyan
+  '#ff0066', // Hot Pink
+  '#1e40ff', // Royal Blue
+  '#39ff14', // Lime Green
+  '#ff8c00', // Orange
+  '#ff2d2d', // Red
+  '#6a00ff', // Violet
+];
+
 /** Palette de secours quand la colonne `couleurs` de la feuille est absente ou vide. */
-export const FALLBACK_COULEURS: readonly string[] = PALETTE.map((key) => COLOR_HEX[key]);
+export const FALLBACK_COULEURS: readonly string[] = GAME_PALETTE;
 
 const HEX_COLOR_RE = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i;
 
@@ -107,17 +122,45 @@ function mix(rgb: readonly [number, number, number], target: number, amount: num
   );
 }
 
-/** Couleur tirée de façon pseudo-aléatoire mais stable pour un même jeu. */
-export function pickGameColor(id: string, palette: readonly string[]): string {
+/**
+ * Couleur tirée de façon pseudo-aléatoire mais stable pour un même jeu,
+ * en évitant d'attribuer la même couleur que celle du jeu précédent (côte à côte).
+ */
+export function pickGameColor(
+  id: string,
+  palette: readonly string[] = GAME_PALETTE,
+  prevColor?: string,
+): string {
   const usable = palette.filter(isHexColor);
-  const list = usable.length > 0 ? usable : FALLBACK_COULEURS;
-  const index = hashString(id) % list.length;
-  return (list[index] ?? FALLBACK_COULEURS[0] ?? DARK_TEXT).trim().toLowerCase();
+  const list = usable.length > 0 ? usable : GAME_PALETTE;
+  const hash = Math.abs(hashString(id));
+  const rawIndex = hash % list.length;
+  const fallback = GAME_PALETTE[0] ?? '#ffd600';
+  let color = (list[rawIndex] ?? fallback).trim().toLowerCase();
+
+  const normalizedPrev = prevColor?.trim().toLowerCase();
+  if (normalizedPrev && color === normalizedPrev && list.length > 1) {
+    const shift = 1 + (hash % (list.length - 1));
+    for (let step = 0; step < list.length; step++) {
+      const candidateIndex = (rawIndex + shift + step) % list.length;
+      const candidateColor = (list[candidateIndex] ?? '').trim().toLowerCase();
+      if (candidateColor !== normalizedPrev && candidateColor.length > 0) {
+        color = candidateColor;
+        break;
+      }
+    }
+  }
+
+  return color;
 }
 
 /** Fond, texte et liseré d'une carte-livre, dérivés d'une couleur de la palette. */
-export function pickGameVisual(id: string, palette: readonly string[]): GameVisual {
-  const background = pickGameColor(id, palette);
+export function pickGameVisual(
+  id: string,
+  palette: readonly string[] = GAME_PALETTE,
+  prevColor?: string,
+): GameVisual {
+  const background = pickGameColor(id, palette, prevColor);
   const foreground = contrastText(background);
   const rgb = parseHex(background);
   const dark = relativeLuminance(rgb) < 0.12;
@@ -127,4 +170,24 @@ export function pickGameVisual(id: string, palette: readonly string[]): GameVisu
     spine: mix(rgb, dark ? 255 : 0, dark ? 0.25 : 0.2),
     foregroundSoft: `${foreground}${foreground === LIGHT_TEXT ? '38' : '2e'}`,
   };
+}
+
+/**
+ * Calcule les styles visuels d'une liste ordonnée de jeux, en garantissant qu'aucun
+ * jeu consécutif n'ait la même couleur d'arrière-plan.
+ */
+export function pickGamesVisuals(
+  jeux: readonly { readonly id: string }[],
+  palette: readonly string[] = GAME_PALETTE,
+): readonly GameVisual[] {
+  const visuals: GameVisual[] = [];
+  let prevColor: string | undefined = undefined;
+
+  for (const jeu of jeux) {
+    const visual = pickGameVisual(jeu.id, palette, prevColor);
+    visuals.push(visual);
+    prevColor = visual.background;
+  }
+
+  return visuals;
 }

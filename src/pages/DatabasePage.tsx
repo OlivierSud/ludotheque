@@ -1,5 +1,8 @@
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Jeu } from '@/types';
+import { normalizeLien } from '@/lib/validation';
+import { GAME_PALETTE, pickGamesVisuals } from '@/lib/colors';
 import { useData } from '@/context/DataContext';
 import { GameCard } from '@/components/GameCard';
 
@@ -7,12 +10,23 @@ export function DatabasePage() {
   const { data } = useData();
   const navigate = useNavigate();
 
+  const gameVisuals = useMemo(
+    () => (data ? pickGamesVisuals(data.jeux, GAME_PALETTE) : []),
+    [data],
+  );
+
+  const openGame = (jeu: Jeu) => {
+    const url = normalizeLien(jeu.lien);
+    if (url === '') {
+      navigate(`/jeu/${jeu.id}`);
+      return;
+    }
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <div className="screen__inner">
-      <header className="page-header">
-        <div>
-          <h1 className="page-title">Liste des jeux</h1>
-        </div>
+      <div className="panel-toolbar">
         <button
           type="button"
           className="primary-button"
@@ -21,9 +35,9 @@ export function DatabasePage() {
         >
           Nouveau jeu
         </button>
-      </header>
+      </div>
 
-      <section className="results book-stack">
+      <section className="results book-stack" aria-label="Liste des jeux">
         {data === null && <p className="state">Chargement…</p>}
         {data !== null && data.jeux.length === 0 && <p className="state">Aucun jeu enregistré.</p>}
         {data !== null &&
@@ -31,9 +45,10 @@ export function DatabasePage() {
             <GameCard
               key={jeu.id}
               jeu={jeu}
-              palette={data.couleurs}
+              palette={GAME_PALETTE}
+              visual={gameVisuals[index]}
               index={index}
-              onOpen={() => navigate(`/jeu/${jeu.id}`)}
+              onOpen={openGame}
               onEdit={() => navigate(`/jeu/${jeu.id}`)}
             />
           ))}

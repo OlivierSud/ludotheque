@@ -299,6 +299,18 @@ doit pas être implémentée.
   `rate_limited` pour tolérer un serveur pas encore mis à jour. Aucune IP n'est plus traitée :
   la ligne correspondante des mentions légales est retirée.
 
+### D-028 — Palette vive de 8 couleurs sans répétition adjacente pour les cartes de jeux
+
+- **Statut** : accepté
+- **Date** : 2026-11-19
+- **Contexte** : l'utilisateur a fourni une palette de 8 couleurs vives pour colorer les cartes-livres de jeux (Sun Yellow `#FFD600`, Electric Cyan `#00D4FF`, Hot Pink `#FF0066`, Royal Blue `#1E40FF`, Lime Green `#39FF14`, Orange `#FF8C00`, Red `#FF2D2D`, Violet `#6A00FF`) et a demandé que deux couleurs identiques ne soient jamais placées côte à côte dans la liste, et que cette palette soit utilisée exclusivement (sans être écrasée par d'anciennes valeurs de la colonne `couleurs` de la feuille).
+- **Décision** :
+  1. La palette de 8 couleurs (`GAME_PALETTE`) est intégrée dans `src/lib/colors.ts` et est utilisée exclusivement par les vues `HomePage` et `DatabasePage`.
+  2. L'attribution des couleurs reste pseudo-aléatoire et déterministe par jeu (`hashString(id)`).
+  3. L'algorithme (`pickGamesVisuals` et `pickGameColor`) garantit qu'aucun jeu adjacent dans une liste n'a la même couleur de fond qu'un jeu voisin (`background !== prevColor`).
+  4. Le calcul de contraste WCAG (`contrastText`) sélectionne automatiquement le texte sombre (`#2b2b2b`) pour les fonds très clairs (jaune, vert lime, orange, cyan) et blanc pour les fonds sombres/vifs (bleu royal, violet, rouge).
+- **Conséquences** : cohérence visuelle riche et dynamique, aucun clignotement au rechargement, lisibilité garantie.
+
 ## Questions ouvertes
 
 | #   | Question                                                           | Impact                   | Bloquant         |

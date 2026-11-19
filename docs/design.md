@@ -132,8 +132,7 @@ Barre d'onglets basse « Jeux / Filtres / Liste ». Les onglets verticaux sont m
 - Bouton « Enregistrer » dans l'en-tête du formulaire et « Nouveau jeu » dans la liste
   (D-017), absents de la maquette.
 - Les critères et options sont dynamiques (D-014) : la maquette en montre 3 à titre d'exemple.
-- Les cartes-livres sont entièrement colorées par une couleur issue de la feuille, avec texte à
-  contraste automatique (D-025), au lieu du fond sombre + liseré gauche coloré de la maquette.
+- Les cartes-livres sont entièrement colorées selon une palette vive de 8 couleurs (Sun Yellow `#FFD600`, Electric Cyan `#00D4FF`, Hot Pink `#FF0066`, Royal Blue `#1E40FF`, Lime Green `#39FF14`, Orange `#FF8C00`, Red `#FF2D2D`, Violet `#6A00FF`) ou issue de la feuille, avec texte à contraste automatique et garantie qu'aucun jeu adjacent ne partage la même couleur (D-025, D-028), au lieu du fond sombre + liseré gauche coloré de la maquette.
 - Boîte de dialogue « Modifications non enregistrées » à la sortie d'un formulaire modifié
   (D-027), absente de la maquette mais nécessaire pour éviter une perte de saisie.
 

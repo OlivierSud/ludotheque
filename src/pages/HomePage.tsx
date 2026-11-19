@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Jeu } from '@/types';
 import { filterGames } from '@/lib/filterGames';
+import { normalizeLien } from '@/lib/validation';
+import { GAME_PALETTE, pickGamesVisuals } from '@/lib/colors';
 import { useData } from '@/context/DataContext';
 import { useFilters } from '@/context/FiltersContext';
 import { Filters } from '@/components/Filters';
@@ -27,12 +29,15 @@ export function HomePage() {
     [data, selection],
   );
 
+  const gameVisuals = useMemo(() => pickGamesVisuals(jeux, GAME_PALETTE), [jeux]);
+
   const openGame = (jeu: Jeu) => {
-    if (jeu.lien === '') {
+    const url = normalizeLien(jeu.lien);
+    if (url === '') {
       navigate(`/jeu/${jeu.id}`);
       return;
     }
-    window.open(jeu.lien, '_blank', 'noopener,noreferrer');
+    window.open(url, '_blank', 'noopener,noreferrer');
     setToast(jeu.nom);
     if (timerRef.current !== null) window.clearTimeout(timerRef.current);
     timerRef.current = window.setTimeout(() => setToast(null), 2500);
@@ -143,7 +148,8 @@ export function HomePage() {
                 <GameCard
                   key={jeu.id}
                   jeu={jeu}
-                  palette={data.couleurs}
+                  palette={GAME_PALETTE}
+                  visual={gameVisuals[index]}
                   index={index}
                   onOpen={openGame}
                   onEdit={(j) => navigate(`/jeu/${j.id}`)}

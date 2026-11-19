@@ -101,4 +101,18 @@ describe('DatabasePage — états', () => {
     expect(screen.getByRole('button', { name: 'Ajouter un jeu' })).toBeTruthy();
     expect(screen.getByText('Catan')).toBeTruthy();
   });
+
+  it('ouvre le lien externe quand on clique sur la carte d’un jeu', async () => {
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+    h.data = {
+      ...DATA,
+      jeux: [{ id: '1', nom: 'Dixit', lien: 'dixit.fr/game', criteres: {} }],
+    };
+    const user = userEvent.setup();
+    renderPage(<DatabasePage />);
+
+    await user.click(screen.getByText('Dixit'));
+    expect(openSpy).toHaveBeenCalledWith('https://dixit.fr/game', '_blank', 'noopener,noreferrer');
+    openSpy.mockRestore();
+  });
 });
